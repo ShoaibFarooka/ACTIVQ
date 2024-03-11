@@ -1,0 +1,128 @@
+.Navbar {
+    position: fixed;
+    /* z-index: 1000; */
+}
+
+.Navbar .NavRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0px;
+    width: 100vw;
+    background: linear-gradient(90deg, rgb(0, 101, 219)40%, rgb(0, 212, 255, 1)100%);
+}
+
+.Navbar .NavLinks {
+    display: flex;
+    gap: 50px;
+    padding-left: 20px;
+    align-items: center;
+}
+
+.Navbar .flex-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.Navbar .title {
+    font-weight: 600;
+    font-size: 22px;
+}
+
+.Navbar .NavLinks .logo {
+    width: 50px;
+    height: 50px;
+}
+
+.Navbar .NavLinks a {
+    color: white;
+    text-decoration: none;
+    margin: 0;
+
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+.Navbar .NavLinks .active-link {
+    color: rgb(238, 255, 0);
+}
+
+.Navbar .NavLinks .nav-page {
+    font-size: 18px;
+}
+
+/* .Navbar .NavLinks .p-non-active:hover {
+    color: rgb(179, 179, 179);
+} */
+
+.Navbar .username {
+    font-size: 16px;
+    font-weight: 600;
+    color: white;
+}
+
+.Navbar .btn-div {
+    padding: 0;
+    padding-right: 40px;
+}
+
+.Navbar .logout-btn {
+    color: white;
+    padding: 3px 24px;
+
+    &:hover {
+        color: black;
+        background-color: white;
+    }
+}
+
+@media only screen and (max-width: 768px) {
+    .Navbar .NavRow {
+        align-items: center;
+    }
+
+    .Navbar .NavLinks {
+        gap: 5vw;
+        padding-left: 2vw;
+    }
+
+    .Navbar .NavLinks .nav-page {
+        font-size: 14px;
+    }
+
+    .Navbar .flex-link {
+        gap: 5px;
+    }
+
+    .Navbar .title {
+        font-size: 18px;
+    }
+
+    .Navbar .NavLinks .logo {
+        width: 30px;
+        height: 30px;
+    }
+
+    .Navbar .btn-div {
+        padding: 0;
+        padding-right: 2vw;
+    }
+
+    .Navbar .username {
+        font-size: 10px;
+        font-weight: 500;
+    }
+
+    .Navbar .logout-btn {
+        font-size: 10px;
+        padding: 3px 16px;
+    }
+}
+
+@media only screen and (max-width: 375px) {
+    .Navbar .logout-btn {
+        padding: 3px 12px;
+    }
+}

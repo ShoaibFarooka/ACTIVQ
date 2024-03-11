@@ -1,0 +1,66 @@
+.Clients {
+    padding: 20px;
+    overflow-x: auto;
+
+    .flex {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 3px 10px;
+
+        .btn {
+            background-color: rgb(12, 77, 240);
+            color: white;
+
+            &:hover {
+                background-color: rgb(9, 52, 161);
+            }
+        }
+    }
+
+    .client-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    .client-table th,
+    .client-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+
+    .client-table th {
+        background-color: #f2f2f2;
+    }
+
+    .action-icons-container {
+        display: flex;
+        align-items: center;
+        gap: 20px
+    }
+
+    .action-icon:hover {
+        cursor: pointer;
+    }
+
+    @media only screen and (max-width: 768px) {
+
+        .client-table th,
+        .client-table td {
+            padding: 8px 4px;
+            font-size: 12px;
+        }
+
+        .action-icons-container {
+            gap: 10px;
+        }
+    }
+}
+
+@media only screen and (max-width: 768px) {
+
+    .Clients {
+    }
+}

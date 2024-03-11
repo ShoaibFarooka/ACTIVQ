@@ -1,0 +1,8 @@
+.footer {
+    background: linear-gradient(90deg, rgb(0, 101, 219)40%, rgb(0, 212, 255, 1)100%);
+}
+
+.row {
+    display: flex;
+    gap: 20px;
+}

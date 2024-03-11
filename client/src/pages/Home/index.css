@@ -1,0 +1,23 @@
+.Home {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+
+    .menu {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+
+        .menu-item {
+            text-decoration: none;
+            padding: 10px;
+            color: #333;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+
+            &:hover {
+                background-color: #f0f0f0;
+            }
+        }
+    }
+}
