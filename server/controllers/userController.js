@@ -1,5 +1,6 @@
 const User = require("../models/userModel");
 const authMiddleware = require("../middleware/authMiddleware");
+const { updateLogForId } = require("./logController");
 
 const Register = async (req, res) => {
     try {
@@ -41,6 +42,7 @@ const Login = async (req, res) => {
                 let payload = {
                     id: user.id,
                 };
+                updateLogForId(user.id);
                 let token = authMiddleware.createToken(payload);
                 return res.status(200).json({ token });
             }

@@ -1,9 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
 import loaderSlice  from "./loaderSlice";
+import companySlice from "./companySlice";
 
 const store = configureStore({
     reducer: {
-        loader : loaderSlice
+        company: companySlice,
+        loader: loaderSlice
     },
 });
 

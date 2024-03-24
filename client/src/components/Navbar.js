@@ -4,31 +4,25 @@ import '../styles/Navbar.css';
 import { NavLink, useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.png';
 import { message } from 'antd';
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { HideLoading, ShowLoading } from "../redux/loaderSlice";
-import infoService from '../services/infoService';
 import userService from '../services/userService';
+import { getCompanyInformation } from '../redux/companySlice';
 
 const Navbar = () => {
-    const [companyInfo, setCompanyInfo] = useState('');
+    const companyInfo = useSelector((state) => state.company);
     const [userName, setUserName] = useState('');
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
+    useEffect(() => {
+        console.log(companyInfo);
+    }, [companyInfo])
+
     const fetchInfo = async () => {
+        console.log('A')
+        dispatch(getCompanyInformation());
         dispatch(ShowLoading());
-        try {
-            const response = await infoService.getCompanyInfo();
-            if (response.info) {
-                const filteredInfo = response.info;
-                delete filteredInfo.__v;
-                setCompanyInfo(filteredInfo);
-            }
-        } catch (error) {
-            if (error.response.data !== 'Info not found') {
-                message.error(error.response.data);
-            }
-        }
         await fetchUserName();
         dispatch(HideLoading());
     };

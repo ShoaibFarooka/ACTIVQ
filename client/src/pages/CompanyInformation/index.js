@@ -1,36 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import './index.css';
 import { message } from 'antd';
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { HideLoading, ShowLoading } from "../../redux/loaderSlice";
 import infoService from '../../services/infoService';
+import { getCompanyInformation } from '../../redux/companySlice';
 
 const CompanyInfo = () => {
-    const [formData, setFormData] = useState({
-        name: '',
-        address: '',
-        telephone: '',
-        logo: null,
-        seal1: null,
-        seal2: null,
-        code: '',
-    });
+    const companyInformation = useSelector(state => state.company);
+    console.log('form data...', companyInformation);
+    const [formData, setFormData] = useState(companyInformation);
     const dispatch = useDispatch();
+
+    useEffect(() => {
+        setFormData(companyInformation);
+    }, [companyInformation]);
 
     const fetchInfo = async () => {
         dispatch(ShowLoading());
-        try {
-            const response = await infoService.getCompanyInfo();
-            if (response.info) {
-                const filteredInfo = response.info;
-                delete filteredInfo.__v;
-                setFormData(filteredInfo);
-            }
-        } catch (error) {
-            if (error.response.data !== 'Info not found') {
-                message.error(error.response.data);
-            }
-        }
+        dispatch(getCompanyInformation());
         dispatch(HideLoading());
     };
 
