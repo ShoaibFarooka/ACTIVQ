@@ -15,12 +15,7 @@ const Navbar = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-    useEffect(() => {
-        console.log(companyInfo);
-    }, [companyInfo])
-
     const fetchInfo = async () => {
-        console.log('A')
         dispatch(getCompanyInformation());
         dispatch(ShowLoading());
         await fetchUserName();

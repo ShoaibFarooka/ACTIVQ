@@ -10,19 +10,40 @@ import AddClientModal from '../../components/AddClientModal';
 import EditClientModal from '../../components/EditClientModal';
 import equipmentService from '../../services/equipmentService';
 import clientService from '../../services/clientService';
+import SearchBar from '../../components/SearchBar/Searchbar';
+import { sort } from 'fast-sort';
+import SortBar from '../../components/SortBar/Sortbar';
 
 // Set the app element for react-modal
 Modal.setAppElement('#root');
 
 const Clients = () => {
+    const CLIENT_HEADERS = [
+        { title: 'Name', label: 'name' },
+        { title: 'Code', label: 'code' },
+        { title: 'Address', label: 'address' },
+        { title: 'Equipment List', label: 'equipments' },
+        { title: 'General Info', label: 'generalInfo' },
+    ]
     const [clients, setClients] = useState([]);
+    const [filteredClients, setFilteredClients] = useState([]);
     const [equipments, setEquipments] = useState([]);
     const [isOpenPopup, setIsOpenPopup] = useState(false);
     const [isOpenPopup2, setIsOpenPopup2] = useState(false);
     const [editClient, setEditClient] = useState('');
+    const [selectedSort, setSelectedSort] = useState('');
     const dispatch = useDispatch();
 
+    function handleSelectedSort(value) {
+        setSelectedSort(value);
+    }
+
+    useEffect(() => {
+        setFilteredClients(sort(filteredClients).asc(item => item[selectedSort]))
+    }, [selectedSort])
+
     const fetchEquipments = async () => {
+        dispatch(ShowLoading());
         try {
             const response = await equipmentService.getEquipments();
             if (response.equipments) {
@@ -39,18 +60,15 @@ const Clients = () => {
             }
             message.error(error.response.data);
         }
-        finally {
-            dispatch(HideLoading());
-        }
     };
 
     const fetchClients = async () => {
-        dispatch(ShowLoading());
         try {
             const response = await clientService.getClients();
             if (response.clients) {
                 const filteredClients = await response.clients.map((client) => {
                     const { __v, ...filteredClient } = client;
+                    filteredClient.equipments = getClientEquipments(filteredClient);
                     return filteredClient;
                 });
                 setClients(filteredClients);
@@ -62,13 +80,17 @@ const Clients = () => {
             message.error(error.response.data);
         }
         finally {
-            fetchEquipments();
+            dispatch(HideLoading());
         }
     };
 
     useEffect(() => {
-        fetchClients();
+        fetchEquipments();
     }, []);
+
+    useEffect(() => {
+        fetchClients();
+    }, [equipments])
 
     const handleDelete = async (clientId) => {
         const confirmDelete = window.confirm('Are you sure you want to delete this client?');
@@ -116,6 +138,16 @@ const Clients = () => {
                     <h2>Client List</h2>
                     <button onClick={handleModalOpen} className='btn'>Add Client</button>
                 </div>
+                <div>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <SearchBar
+                            items={clients}
+                            onResults={(results) => setFilteredClients(sort(results).asc(item => item[selectedSort]))}
+                            excludedItems={['_id', 'type']}
+                        />
+                        <SortBar items={CLIENT_HEADERS} onChange={handleSelectedSort}/>
+                    </div>
+                </div>
                 <table className='client-table'>
                     <thead>
                         <tr>
@@ -128,12 +160,13 @@ const Clients = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {clients.map((client) => (
+                        {filteredClients.map((client) => {
+                            return (
                             <tr key={client._id}>
                                 <td>{client.name}</td>
                                 <td>{client.code}</td>
                                 <td>{client.address}</td>
-                                <td>{getClientEquipments(client)}</td>
+                                <td>{client.equipments}</td>
                                 <td>{client.generalInfo}</td>
                                 <td>
                                     <div className='action-icons-container'>
@@ -142,7 +175,8 @@ const Clients = () => {
                                     </div>
                                 </td>
                             </tr>
-                        ))}
+                            )
+                        })}
                     </tbody>
                 </table>
             </div>

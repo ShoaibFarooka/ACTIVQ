@@ -10,16 +10,39 @@ import AddEquipmentModal from '../../components/AddEquipmentModal';
 import EditEquipmentModal from '../../components/EditEquipmentModal';
 import clientService from '../../services/clientService';
 import equipmentService from '../../services/equipmentService';
+import SearchBar from '../../components/SearchBar/Searchbar';
+import SortBar from '../../components/SortBar/Sortbar';
+import { sort } from 'fast-sort';
 
 // Set the app element for react-modal
 Modal.setAppElement('#root');
 
 const Equipments = () => {
+    const EQUIPMENT_HEADERS = [
+        { title: 'Owner', label: 'ownerName' },
+        { title: 'Code', label: 'code' },
+        { title: 'Description', label: 'description' },
+        { title: 'Manufacturer', label: 'manufacturer' },
+        { title: 'Model', label: 'model' },
+        { title: 'Serial No', label: 'serialNo' },
+    ];
     const [equipments, setEquipments] = useState([]);
+    const [filteredEquipments, setFilteredEquipments] = useState([]);
     const [clients, setClients] = useState([]);
     const [isOpenPopup, setIsOpenPopup] = useState(false);
     const [isOpenPopup2, setIsOpenPopup2] = useState(false);
     const [editEquipment, setEditEquipment] = useState('');
+    const [selectedSort, setSelectedSort] = useState('');
+
+    function handleSelectedSort(value) {
+        setSelectedSort(value);
+    }
+
+    useEffect(() => {
+        setFilteredEquipments(sort(filteredEquipments).asc(item => item[selectedSort]))
+    }, [selectedSort])
+    
+
     const dispatch = useDispatch();
 
     const fetchClients = async () => {
@@ -50,6 +73,7 @@ const Equipments = () => {
             if (response.equipments) {
                 const filteredEquipments = await response.equipments.map((equipment) => {
                     const { __v, ...filteredEquipment } = equipment;
+                    filteredEquipment.ownerName = filteredEquipment.owner?.name;
                     return filteredEquipment;
                 });
                 const sortedEquipments = filteredEquipments.sort((a, b) => a.type.localeCompare(b.type));
@@ -108,7 +132,7 @@ const Equipments = () => {
         }
         const timeDifference = nextCalibrationDate.getTime() - Date.now();
         const daysUntilCalibration = Math.ceil(timeDifference / (1000 * 60 * 60 * 24));
-        if (daysUntilCalibration <= 30) {
+        if (daysUntilCalibration > 30) {
             return 'highlight';
         }
         else {
@@ -151,6 +175,14 @@ const Equipments = () => {
             <div className='Equipments'>
                 <div className='flex'>
                     <h2 className='title'>Equipment List</h2>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <SearchBar
+                            items={equipments}
+                            onResults={(results) => setFilteredEquipments(sort(results).asc(item => item[selectedSort]))}
+                            excludedItems={['_id', 'type']}
+                        />
+                        <SortBar items={EQUIPMENT_HEADERS} onChange={handleSelectedSort}/>
+                    </div>
                     <button onClick={handleModalOpen} className='btn btn-1'>Add Equipment</button>
                 </div>
                 <table className='equipment-table'>
@@ -168,7 +200,7 @@ const Equipments = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {equipments.map((equipment) => (
+                        {filteredEquipments.map((equipment) => (
                             <tr key={equipment._id} className={isNextCalibrationDueSoon(equipment)}>
                                 <td>{equipment.owner?.name}</td>
                                 <td>{equipment.code}</td>

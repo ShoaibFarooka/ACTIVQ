@@ -1,6 +1,24 @@
 const router = require("express").Router();
 const controller = require("../controllers/userController");
 const authMiddleware = require("../middleware/authMiddleware");
+const multer = require("multer");
+
+// Images Storage
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, "photo-signatures/");
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + "-" + file.originalname);
+    },
+});
+
+const upload = multer({ storage: storage });
+
+const uploadPhotoSign = (req, res, next) => {
+    upload.fields([{ name: 'photoSignature' }]);
+    next();
+};
 
 router.post(
     "/register",
@@ -23,6 +41,18 @@ router.get(
     controller.GetUserName
 );
 router.get(
+    "/get-user-id",
+    authMiddleware.stripToken,
+    authMiddleware.verifyToken,
+    controller.GetUserId
+);
+router.get(
+    "/get-user-photo-signature",
+    authMiddleware.stripToken,
+    authMiddleware.verifyToken,
+    controller.GetUserPhotoSignature
+);
+router.get(
     "/get-users",
     authMiddleware.stripToken,
     authMiddleware.verifyToken,
@@ -38,12 +68,14 @@ router.post(
     "/add-user",
     authMiddleware.stripToken,
     authMiddleware.verifyToken,
+    upload.fields([{ name: 'photoSignature' }]),
     controller.AddUser
 );
 router.put(
     "/update-user/:userId",
     authMiddleware.stripToken,
     authMiddleware.verifyToken,
+    upload.fields([{ name: 'photoSignature' }]),
     controller.UpdateUser
 );
 router.get(

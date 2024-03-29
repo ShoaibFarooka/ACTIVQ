@@ -2,18 +2,16 @@ const mongoose = require("mongoose");
 
 const logSchema = new mongoose.Schema(
   {
-    id: {
-      type: String,
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
     loginTime: {
       type: [String],
-      default: [],
-      required: true
+      required: true,
     },
-  },
-  { timestamps: true }
+  }
 );
 
 const Logs = new mongoose.model("Log", logSchema);
