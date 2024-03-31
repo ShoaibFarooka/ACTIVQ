@@ -50,17 +50,14 @@ const QMS = () => {
 
   useEffect(() => {
     if (manualSelectSort === 'date')
-      setManualReports(sort(manualReports).desc(item => {
-        console.log('-->', item[manualSelectSort]);
-        return new Date(item[manualSelectSort]).setHours(0,0,0,0);
-      }));
+      setManualReports(sort(manualReports).desc(item => new Date(item[manualSelectSort]).setHours(0,0,0,0)));
     else 
       setManualReports(sort(manualReports).asc(item => item[manualSelectSort]));
   }, [manualSelectSort]);
 
   useEffect(() => {
     if (procedureSelectSort === 'date')
-      setProcedureReports(sort(procedureReports).desc(item => item[procedureSelectSort]));
+      setProcedureReports(sort(procedureReports).desc(item => new Date(item[procedureSelectSort]).setHours(0,0,0,0)));
     else
       setProcedureReports(sort(procedureReports).asc(item => item[procedureSelectSort]));
   }, [procedureSelectSort]);
@@ -74,7 +71,7 @@ const QMS = () => {
           <SortBar items={QMS_HEADERS} onChange={(selection) => setManualSelectSort(selection)} />
         </div>
           {!manualUpload ? (
-            <label for="manual-upload" class="btn btn-select">
+            <label for="manual-upload" className="btn btn-select">
               Upload File
             </label>
           ) : (
@@ -139,7 +136,7 @@ const QMS = () => {
                 .map((manualItem) => (
                   <tr key={manualItem._id}>
                     <td>{manualItem.fileName}</td>
-                    <td>{manualItem.date}</td>
+                    <td>{convertDateFormat(manualItem.date)}</td>
                     <td>
                       <div className="action-icons-container">
                         <a href={manualItem.downloadUrl} download target="_blank" rel="noreferrer">
@@ -185,7 +182,7 @@ const QMS = () => {
             <SortBar items={QMS_HEADERS} onChange={(selection) => setProcedureSelectSort(selection)} />
           </div>
           {!procedureUpload ? (
-            <label for="procedure-upload" class="btn btn-select">
+            <label for="procedure-upload" className="btn btn-select">
               Upload File
             </label>
           ) : (
@@ -250,7 +247,7 @@ const QMS = () => {
                 .map((procedureItem) => (
                   <tr key={procedureItem._id}>
                     <td>{procedureItem.fileName}</td>
-                    <td>{procedureItem.date}</td>
+                    <td>{convertDateFormat(procedureItem.date)}</td>
                     <td>
                       <div className="action-icons-container">
                         <a href={procedureItem.downloadUrl} download target="_blank" rel="noreferrer">
@@ -292,5 +289,18 @@ const QMS = () => {
     </>
   );
 };
+
+function convertDateFormat(inputDate) {
+  // Split the input date into month, day, and year
+  var parts = inputDate.split("/");
+  var month = parts[0];
+  var day = parts[1];
+  var year = parts[2];
+
+  // Reformat the date into DD/MM/YYYY format
+  var formattedDate = day + "/" + month + "/" + year;
+
+  return formattedDate;
+}
 
 export default QMS;

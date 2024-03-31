@@ -1,5 +1,15 @@
 const User = require("../models/userModel");
 const Equipment = require("../models/equipmentModel");
+const nodemailer = require("nodemailer"); 
+
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.SENDER_EMAIL,
+        pass: process.env.SENDER_EMAIL_PASSWORD
+    }
+});
+
 
 const GetEquipments = async (req, res) => {
     try {
@@ -203,11 +213,46 @@ const AddCalibrationDetails = async (req, res) => {
     }
 };
 
+const RemindOwnerViaMail = async (req, res) => {
+    const { ownerName, claibrationDetails, code, manufacturer, model, serialNo, owner } = req.body;
+    const formattedNextCallibrationDate = new Date(claibrationDetails[0].dateOfCalibration).toDateString();
+    
+    let mailOptions = {
+        from: process.env.SENDER_EMAIL,
+        to: owner.email,
+        subject: 'Calibration Reminder for Equipment',
+        text: 
+        `
+Dear ${ownerName},
+        
+Just a quick reminder that the calibration for the following equipment is due soon:
+        
+Equipment Code: ${code}
+Manufacturer: ${manufacturer}
+Model: ${model}
+Serial No: ${serialNo}
+Next Proposed Calibration Date: ${formattedNextCallibrationDate}
+Please schedule calibration before the proposed date to ensure continued accuracy and reliability.
+        
+Best regards`,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            console.log('Mail error:', error);
+            return res.status(502).send(`Something went wrong.. ${error}`)
+        }
+        return res.status(200).send('User notified Successfully!');
+    });
+
+};
+
 module.exports = {
     GetEquipments,
     DeleteEquipment,
     AddEquipment,
     UpdateEquipment,
     GetEquipmentReport,
-    AddCalibrationDetails
+    AddCalibrationDetails,
+    RemindOwnerViaMail
 };

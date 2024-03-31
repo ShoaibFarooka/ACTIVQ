@@ -59,7 +59,7 @@ const Login = () => {
                         <h1 className="display-4 fw-bolder">Welcome Back</h1>
                         <p className="lead text-center">Enter Your Credentials To Login</p>
                         <img src="banner.png" width={"70%"} alt="Banner" />
-                        <i class="text-center mb-2">“Your calibration software”.</i>
+                        <i className="text-center mb-2">“Your calibration software”.</i>
                     </div>
                     <div className="col-md-6 p-5">
                         <h1 className="display-6 fw-bolder mb-5">LOGIN</h1>

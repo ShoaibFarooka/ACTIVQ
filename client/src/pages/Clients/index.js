@@ -143,7 +143,7 @@ const Clients = () => {
                         <SearchBar
                             items={clients}
                             onResults={(results) => setFilteredClients(sort(results).asc(item => item[selectedSort]))}
-                            excludedItems={['_id', 'type']}
+                            excludedItems={['_id', 'type', 'email']}
                         />
                         <SortBar items={CLIENT_HEADERS} onChange={handleSelectedSort}/>
                     </div>

@@ -23,7 +23,6 @@ const SearchBar = ({
   ];
 
   useEffect(() => {
-    console.log("this case just had a run...!");
     onResults(items);
   }, [items]);
 

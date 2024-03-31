@@ -13,6 +13,7 @@ import equipmentService from '../../services/equipmentService';
 import SearchBar from '../../components/SearchBar/Searchbar';
 import SortBar from '../../components/SortBar/Sortbar';
 import { sort } from 'fast-sort';
+import { IoMailUnread } from 'react-icons/io5';
 
 // Set the app element for react-modal
 Modal.setAppElement('#root');
@@ -39,7 +40,10 @@ const Equipments = () => {
     }
 
     useEffect(() => {
-        setFilteredEquipments(sort(filteredEquipments).asc(item => item[selectedSort]))
+        setFilteredEquipments(sort(filteredEquipments).by({
+            asc: item => item[selectedSort],
+            comparer: new Intl.Collator(undefined, { caseFirst: 'false' }).compare,
+        }))
     }, [selectedSort])
     
 
@@ -111,7 +115,16 @@ const Equipments = () => {
         setEditEquipment(equipment);
         setIsOpenPopup2(true);
     };
-
+    const handleRemind = async (equipment) => {
+        dispatch(ShowLoading());
+        try {
+            const response = await equipmentService.remindOwner(equipment);
+            message.success(response);
+        } catch (error) {
+            message.error(error.response.data);
+        }
+        fetchEquipments();
+    };
     const handleModalClose2 = () => {
         setEditEquipment('');
         setIsOpenPopup2(false);
@@ -178,7 +191,10 @@ const Equipments = () => {
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                         <SearchBar
                             items={equipments}
-                            onResults={(results) => setFilteredEquipments(sort(results).asc(item => item[selectedSort]))}
+                            onResults={(results) => setFilteredEquipments(sort(results).by({
+                                asc: item => item[selectedSort],
+                                comparer: new Intl.Collator(undefined, { caseFirst: 'false' }).compare,
+                            }))}
                             excludedItems={['_id', 'type']}
                         />
                         <SortBar items={EQUIPMENT_HEADERS} onChange={handleSelectedSort}/>
@@ -214,6 +230,10 @@ const Equipments = () => {
                                     <div className='action-icons-container'>
                                         <FaEdit size={20} className='action-icon' color='#c68642' onClick={() => handleEdit(equipment)} />
                                         <MdDelete size={22} className='action-icon' color='#C93616' onClick={() => handleDelete(equipment._id)} />
+                                        {
+                                            isNextCalibrationDueSoon(equipment) === 'highlight' &&
+                                            <IoMailUnread size={20} className='action-icon' color='#C93616' onClick={() => handleRemind(equipment)} />
+                                        }
                                     </div>
                                 </td>
                             </tr>

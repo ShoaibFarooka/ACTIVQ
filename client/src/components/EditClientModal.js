@@ -9,6 +9,7 @@ const EditClientModal = ({ isOpen, onRequestClose, fetchClients, Client }) => {
     const [formData, setFormData] = useState({
         name: Client.name,
         code: Client.code,
+        email: Client.email,
         address: Client.address,
         generalInfo: Client.generalInfo,
     });
@@ -22,8 +23,12 @@ const EditClientModal = ({ isOpen, onRequestClose, fetchClients, Client }) => {
     };
 
     const handleUpdateClient = async () => {
-        if (!formData.name || !formData.code || !formData.address) {
+        if (!formData.name || !formData.code || !formData.address || !formData.email) {
             return message.error('Please fill all fields!');
+        }
+        const emailRegex = /^[\w-]+(\.[\w-]+)*@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*(\.[a-zA-Z]{2,})$/;
+        if(!emailRegex.test(formData.email)){
+            return message.error('Invalid Email, Please retry!');
         }
         try {
             const response = await clientService.updateClient(formData, Client._id);
@@ -62,6 +67,16 @@ const EditClientModal = ({ isOpen, onRequestClose, fetchClients, Client }) => {
                             id='code'
                             name="code"
                             value={formData.code}
+                            onChange={handleInputChange}
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor='email'>Email: </label>
+                        <input
+                            type="email"
+                            id='email'
+                            name="email"
+                            value={formData.email}
                             onChange={handleInputChange}
                         />
                     </div>
