@@ -19,6 +19,7 @@ const EditUserModal = ({ isOpen, onRequestClose, fetchUsers, User, operatorRole 
             'Development, editing or validation of methods': User.permissions.includes('Development, editing or validation of methods'),
             'Photo signature': User.permissions.includes('Photo signature'),
         },
+        photoSignature: User.photoSignature?.trim() === "" ? null : User.photoSignature 
     });
 
     const handleInputChange = (e) => {
@@ -45,6 +46,9 @@ const EditUserModal = ({ isOpen, onRequestClose, fetchUsers, User, operatorRole 
         }
         if (formData.password) {
             data.password = formData.password;
+        }
+        if (formData.role === 'manager' && formData.photoSignature != null) {
+            data.photoSignature = formData.photoSignature;
         }
         try {
             const response = await userService.updateUser(data, User._id);
@@ -137,6 +141,22 @@ const EditUserModal = ({ isOpen, onRequestClose, fetchUsers, User, operatorRole 
                                     </div>
                                 ))}
                             </div>
+                        </div>
+                    }
+                    {formData.role === 'manager' &&
+                        <div>
+                            {formData.photoSignature != null && 
+                                <img width={160} src={formData.photoSignature instanceof File ?
+                                    URL.createObjectURL(formData.photoSignature) 
+                                    : formData.photoSignature} 
+                                    alt='Photo_Signature.' 
+                                />
+                            }
+                            <br />
+                            Add Photo Signature:
+                            <input type="file" multiple={false} onChange={(ev) => {
+                                setFormData({...formData, photoSignature: ev.target.files[0] })
+                            }} />
                         </div>
                     }
                     <div className="btn-div">

@@ -14,6 +14,7 @@ import Clients from './pages/Clients';
 import Equipments from './pages/Equipments/index.js';
 import Calibrations from './pages/Calibrations/index.js';
 import NotFound from './pages/NotFound';
+import QMS from './pages/QMS/index.js';
 
 function App() {
   const { loading } = useSelector((state) => state.loader);
@@ -59,6 +60,12 @@ function App() {
         <Route path="/issue-calibration-report" element={
           <ProtectedRoute>
             <Calibrations />
+          </ProtectedRoute>
+        }
+        />
+        <Route path="/qms" element={
+          <ProtectedRoute>
+            <QMS />
           </ProtectedRoute>
         }
         />

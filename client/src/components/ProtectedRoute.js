@@ -14,9 +14,9 @@ const ProtectedRoute = ({ children }) => {
 
   useEffect(() => {
     const fetchUserRole = async () => {
-      const role = await getUserRole();
+      const { role, permissions } = await getUserRole();
       setUserRole(role);
-      const authorized = verifyAuthorization(role);
+      const authorized = verifyAuthorization(role, permissions);
       setIsAuthorized(authorized);
     };
 

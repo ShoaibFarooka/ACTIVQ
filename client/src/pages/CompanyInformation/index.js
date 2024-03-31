@@ -1,37 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import './index.css';
 import { message } from 'antd';
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { HideLoading, ShowLoading } from "../../redux/loaderSlice";
 import infoService from '../../services/infoService';
+import { getCompanyInformation } from '../../redux/companySlice';
+import userService from '../../services/userService';
 
 const CompanyInfo = () => {
-    const [formData, setFormData] = useState({
-        name: '',
-        address: '',
-        telephone: '',
-        logo: null,
-        seal1: null,
-        seal2: null,
-        code: '',
-    });
+    const companyInformation = useSelector(state => state.company);
+    const [formData, setFormData] = useState(companyInformation);
+    // Adding admin in name to explicity metion
+    // admin [logged in] user-only change.
+    const [adminPhotoSignature, setAdminPhotoSignature] = useState(null);
     const dispatch = useDispatch();
+
+    useEffect(() => {
+        setFormData(companyInformation);
+    }, [companyInformation]);
 
     const fetchInfo = async () => {
         dispatch(ShowLoading());
-        try {
-            const response = await infoService.getCompanyInfo();
-            if (response.info) {
-                const filteredInfo = response.info;
-                delete filteredInfo.__v;
-                setFormData(filteredInfo);
-            }
-        } catch (error) {
-            if (error.response.data !== 'Info not found') {
-                message.error(error.response.data);
-            }
-        }
+        dispatch(getCompanyInformation());
         dispatch(HideLoading());
+        const { photoSignature } = await userService.getUserPhotoSignature();
+        setAdminPhotoSignature(photoSignature);
     };
 
     useEffect(() => {
@@ -73,6 +66,21 @@ const CompanyInfo = () => {
             fetchInfo();
         } catch (error) {
             message.error(error.response.data);
+        }
+    };
+
+    const updateAdminPhotoSignature = async () => {
+        try {
+            const { id } = await userService.getUserId();
+            const { role } = await userService.getUserRole();
+            const response = await userService.updateUser({
+                photoSignature: adminPhotoSignature,
+                role
+            }, id);
+            message.success(response.message);
+            setAdminPhotoSignature(response.photoSignature)
+        } catch (error) {
+            message.error('Something went wrong');            
         }
     };
 
@@ -151,6 +159,29 @@ const CompanyInfo = () => {
                     />
                 )}
 
+                <div>
+                    {adminPhotoSignature != null && 
+                        <img width={160} src={adminPhotoSignature instanceof File
+                            ? URL.createObjectURL(adminPhotoSignature) 
+                            : adminPhotoSignature}
+                            alt='Photo_Signature.' 
+                        />
+                    }
+                    <br />
+                    Add Photo Signature:
+                    <br />
+                    <div>
+                        <input type="file" multiple={false} onChange={(ev) => {
+                            setAdminPhotoSignature(ev.target.files[0])
+                        }} />
+                        {(adminPhotoSignature && adminPhotoSignature instanceof File) &&
+                            <div className='save-signature' onClick={updateAdminPhotoSignature}>
+                                Save
+                            </div>
+                        }
+                    </div>
+                </div>
+
                 <label htmlFor="uniqueCode">Unique Code (Max 4 characters)</label>
                 <input
                     type="text"
@@ -160,7 +191,6 @@ const CompanyInfo = () => {
                     value={formData.code}
                     onChange={handleInputChange}
                 />
-
                 <button type="button" onClick={handleSave}>
                     Save
                 </button>

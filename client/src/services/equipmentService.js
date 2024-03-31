@@ -49,6 +49,14 @@ const equipmentService = {
             throw error;
         }
     },
+    remindOwner: async (payload) => {
+        try {
+            const response = await axiosInstance.post('/equipments/remind-owner', payload);
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
 };
 
 export default equipmentService;

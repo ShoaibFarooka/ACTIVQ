@@ -1,5 +1,6 @@
 const User = require("../models/userModel");
 const authMiddleware = require("../middleware/authMiddleware");
+const { updateLogForId } = require("./logController");
 
 const Register = async (req, res) => {
     try {
@@ -41,6 +42,7 @@ const Login = async (req, res) => {
                 let payload = {
                     id: user.id,
                 };
+                updateLogForId(user.id);
                 let token = authMiddleware.createToken(payload);
                 return res.status(200).json({ token });
             }
@@ -57,7 +59,7 @@ const GetUserRole = async (req, res) => {
         const userId = res.locals.payload.id;
         const user = await User.findById(userId);
         if (user) {
-            return res.status(200).json({ role: user.role });
+            return res.status(200).json({ role: user.role, permissions: user.permissions });
         }
         res.status(404).send('User not found');
     } catch (error) {
@@ -76,6 +78,30 @@ const GetUserName = async (req, res) => {
         res.status(404).send('User not found');
     } catch (error) {
         res.status(500).send('Internal Server Error');
+        throw error;
+    }
+};
+
+const GetUserId = async (req, res) => {
+    try {
+        const userId = res.locals.payload.id;
+        return res.status(200).json({ id: userId });
+    } catch (error) {
+        res.status(500).send('Internal Server Error\n' + error);
+        throw error;
+    }
+};
+
+const GetUserPhotoSignature = async (req, res) => {
+    try {
+        const userId = res.locals.payload.id;
+        const user = await User.findById(userId);
+        if (user) {
+            return res.status(200).json({ photoSignature: user.photoSignature });
+        }
+        res.status(404).send('User not found');
+    } catch (error) {
+        res.status(500).send('Internal Server Error\n' + error);
         throw error;
     }
 };
@@ -139,14 +165,24 @@ const AddUser = async (req, res) => {
             }
             else {
                 const passwordDigest = await authMiddleware.hashPassword(password);
-                const newUser = await User.create({
+                const userData = {
                     name,
                     username,
                     code,
                     password: passwordDigest,
                     role,
                     permissions
-                });
+                }
+
+                const baseUrl = `${req.protocol}://${req.get('host')}`;
+                let photoSignatureUrl = "";
+                
+                if (req.files?.photoSignature || req.photoSignature) {
+                    photoSignatureUrl = req.files?.photoSignature ? baseUrl + '/photo-signatures/' + req.files?.photoSignature?.[0]?.filename : req?.photoSignature;
+                    userData.photoSignature = photoSignatureUrl;
+                }
+
+                const newUser = await User.create(userData);
                 if (newUser) {
                     return res.status(200).send('User created successfully');
                 }
@@ -166,6 +202,26 @@ const UpdateUser = async (req, res) => {
     try {
         const { name, username, code, password, role, permissions } = req.body;
         const userId = req.params.userId;
+        
+        // Check if its the admin
+        // photo signature update
+        // call from /company-information
+        if (
+            role == 'admin'
+            && (req.files?.photoSignature || req.photoSignature) 
+            && (!name && !username && !code && !password)
+        ) {
+            // Update admin's photo signature.
+            const baseUrl = `${req.protocol}://${req.get('host')}`;
+            const photoSignatureUrl = req.files?.photoSignature ? baseUrl + '/photo-signatures/' + req.files?.photoSignature?.[0]?.filename : req?.photoSignature;
+            
+            const updatedUser = await User.findByIdAndUpdate(userId, { photoSignature: photoSignatureUrl });
+            return res.status(200).json({
+                message: 'Administrator\'s Photo Signature Updated Successfully!',
+                photoSignature: photoSignatureUrl
+            });
+        }
+
         if (!name || !username || !code || !role) {
             return res.status(400).send('Invalid data');
         }
@@ -190,9 +246,18 @@ const UpdateUser = async (req, res) => {
                     role,
                     permissions
                 }
+                if (role == 'employee') userData.photoSignature = null;
                 if (password) {
                     const passwordDigest = await authMiddleware.hashPassword(password);
                     userData.password = passwordDigest;
+                }
+
+                const baseUrl = `${req.protocol}://${req.get('host')}`;
+                let photoSignatureUrl = "";
+                
+                if (req.files?.photoSignature || req.photoSignature) {
+                    photoSignatureUrl = req.files?.photoSignature ? baseUrl + '/photo-signatures/' + req.files?.photoSignature?.[0]?.filename : req?.photoSignature;
+                    userData.photoSignature = photoSignatureUrl;
                 }
                 const updatedUser = await User.findByIdAndUpdate(userId, userData);
                 if (updatedUser) {
@@ -233,6 +298,8 @@ module.exports = {
     Register,
     GetUserRole,
     GetUserName,
+    GetUserId,
+    GetUserPhotoSignature,
     GetUsers,
     DeleteUser,
     AddUser,

@@ -9,6 +9,7 @@ const userRoutes = require("./routes/userRoutes");
 const infoRoutes = require("./routes/infoRoutes");
 const clientRoutes = require("./routes/clientRoutes");
 const equipmentRoutes = require("./routes/equipmentRoutes");
+const qmsRoutes = require("./routes/qmsRoutes");
 
 //Express Server Setup
 const app = express();
@@ -40,12 +41,14 @@ mongoose.connect(DB)
 
         //Serve Images
         app.use('/uploads', express.static(path.join(__dirname, 'Photos')));
+        app.use('/photo-signatures', express.static(path.join(__dirname, 'photo-signatures')));
 
         // Routes
         app.use("/users", userRoutes);
         app.use("/info", infoRoutes);
         app.use("/clients", clientRoutes);
         app.use("/equipments", equipmentRoutes);
+        app.use("/qms", qmsRoutes);
 
         app.listen(port, () => {
             console.log(`Node/Express Server is Up......\nPort: localhost:${port}`);

@@ -1,6 +1,7 @@
 import Cookies from 'js-cookie';
 import userService from '../services/userService';
 import { message } from 'antd';
+import { AUTHORITY } from './constants';
 
 const isAuthenticated = () => {
     const token = Cookies.get('activq-jwt-token');
@@ -10,8 +11,8 @@ const isAuthenticated = () => {
 const getUserRole = async () => {
     try {
         const response = await userService.getUserRole();
-        if (response.role) {
-            return response.role;
+        if (response.role || response.permissions) {
+            return response;
         }
         return null;
     } catch (error) {
@@ -19,11 +20,14 @@ const getUserRole = async () => {
         return null;
     }
 }
-const verifyAuthorization = (role) => {
+const verifyAuthorization = (role, permissions) => {
     const allowedPages = {
         manager: ['/home', '/users', '/clients', '/equipments','/issue-calibration-report'],
         employee: ['/home', '/issue-calibration-report'],
     };
+    if (role === 'employee' &&  permissions.includes(AUTHORITY.level_four)) {
+        allowedPages[role]?.push('/qms');
+    }
     if (role === 'admin') {
         return true;
     }

@@ -44,3 +44,13 @@
         }
     }
 }
+
+.save-signature {
+    padding: 5px 10px;
+    background-color: #4caf50;
+    color: white;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    width: fit-content;
+}

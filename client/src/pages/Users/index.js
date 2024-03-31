@@ -9,6 +9,8 @@ import { MdDelete } from "react-icons/md";
 import AddUserModal from '../../components/AddUserModal';
 import EditUserModal from '../../components/EditUserModal';
 import userService from '../../services/userService';
+import SortBar from '../../components/SortBar/Sortbar';
+import { sort } from 'fast-sort';
 
 // Set the app element for react-modal
 Modal.setAppElement('#root');
@@ -19,6 +21,22 @@ const Users = ({ userRole }) => {
     const [isOpenPopup2, setIsOpenPopup2] = useState(false);
     const [editUser, setEditUser] = useState('');
     const dispatch = useDispatch();
+    const [selectedSort, setSelectedSort] = useState('');
+    const USER_HEADERS = [
+        {title: 'Name', label: 'name'},
+        {title: 'Code', label: 'code'},
+        {title: 'Role', label: 'role'},
+        {title: 'Permissions', label: 'permissions'},
+    ];
+
+    function handleSelectedSort(value) {
+        setSelectedSort(value);
+    }
+
+    useEffect(() => {
+        setUsers(sort(users).asc(item => item[selectedSort]))
+    }, [selectedSort])
+
 
     const fetchUsers = async () => {
         dispatch(ShowLoading());
@@ -29,8 +47,7 @@ const Users = ({ userRole }) => {
                     const { __v, ...filteredUser } = user;
                     return filteredUser;
                 });
-                const sortedUsers = filteredUsers.sort((a, b) => a.role.localeCompare(b.role));
-                setUsers(sortedUsers);
+                setUsers(sort(filteredUsers).asc(item => item[selectedSort]))
             }
         } catch (error) {
             if (error.response.data === 'Users not found') {
@@ -90,6 +107,7 @@ const Users = ({ userRole }) => {
                     <h2>User List</h2>
                     {userRole === 'admin' && <button onClick={handleModalOpen} className='btn'>Add User</button>}
                 </div>
+                <SortBar items={USER_HEADERS} onChange={handleSelectedSort} />
                 <table className='user-table'>
                     <thead>
                         <tr>

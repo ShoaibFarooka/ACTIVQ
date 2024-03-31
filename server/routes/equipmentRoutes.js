@@ -39,4 +39,11 @@ router.post(
     controller.AddCalibrationDetails
 );
 
+router.post(
+    "/remind-owner",
+    authMiddleware.stripToken,
+    authMiddleware.verifyToken,
+    controller.RemindOwnerViaMail
+);
+
 module.exports = router;

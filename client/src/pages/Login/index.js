@@ -58,13 +58,8 @@ const Login = () => {
                     <div className="col-md-5 d-flex flex-column align-items-center text-white justify-content-center form">
                         <h1 className="display-4 fw-bolder">Welcome Back</h1>
                         <p className="lead text-center">Enter Your Credentials To Login</p>
-                        <h5 className="mb-4">OR</h5>
-                        <NavLink
-                            to="/register"
-                            className="btn btn-outline-light rounded-pill pb-2 w-50"
-                        >
-                            Register
-                        </NavLink>
+                        <img src="banner.png" width={"70%"} alt="Banner" />
+                        <i className="text-center mb-2">“Your calibration software”.</i>
                     </div>
                     <div className="col-md-6 p-5">
                         <h1 className="display-6 fw-bolder mb-5">LOGIN</h1>

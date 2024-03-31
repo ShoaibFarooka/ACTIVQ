@@ -40,8 +40,8 @@ const DeleteClient = async (req, res) => {
 
 const AddClient = async (req, res) => {
     try {
-        const { name, code, address, generalInfo } = req.body;
-        if (!name || !code || !address) {
+        const { name, code, address, generalInfo, email } = req.body;
+        if (!name || !code || !address || !email) {
             return res.status(400).send('Invalid data');
         }
         const operatorId = res.locals.payload.id;
@@ -55,6 +55,7 @@ const AddClient = async (req, res) => {
                 const newClient = await Client.create({
                     name,
                     code,
+                    email,
                     address,
                     generalInfo
                 });
@@ -75,9 +76,9 @@ const AddClient = async (req, res) => {
 
 const UpdateClient = async (req, res) => {
     try {
-        const { name, code, address, generalInfo } = req.body;
+        const { name, code, email, address, generalInfo } = req.body;
         const clientId = req.params.clientId;
-        if (!name || !code || !address) {
+        if (!name || !code || !address || !email) {
             return res.status(400).send('Invalid data');
         }
         const operatorId = res.locals.payload.id;
@@ -91,6 +92,7 @@ const UpdateClient = async (req, res) => {
                 const clientData = {
                     name,
                     code,
+                    email,
                     address,
                     generalInfo
                 }
