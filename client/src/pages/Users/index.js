@@ -34,7 +34,10 @@ const Users = ({ userRole }) => {
     }
 
     useEffect(() => {
-        setUsers(sort(users).asc(item => item[selectedSort]))
+        setUsers(sort(users).by({
+            asc: item => item[selectedSort],
+            comparer: new Intl.Collator(undefined, { caseFirst: 'false' }).compare,
+        }))
     }, [selectedSort])
 
 
@@ -47,7 +50,10 @@ const Users = ({ userRole }) => {
                     const { __v, ...filteredUser } = user;
                     return filteredUser;
                 });
-                setUsers(sort(filteredUsers).asc(item => item[selectedSort]))
+                setUsers(sort(filteredUsers).by({
+                    asc: item => item[selectedSort],
+                    comparer: new Intl.Collator(undefined, { caseFirst: 'false' }).compare,
+                }))
             }
         } catch (error) {
             if (error.response.data === 'Users not found') {

@@ -1,216 +1,110 @@
-const uploadFilesToGoogleCloud = (req, res) => {
-  // TODO:
-  // add code to upload files to
-  // google drive / cloud..
-  const date = new Date().toISOString();
-  const { type } = req.body;
+const { v4: uuidv4 } = require('uuid');
+const { Storage } = require('@google-cloud/storage');
+
+// Google Cloud Storage Setup
+const GoogleStorage = new Storage({
+  projectId: process.env.GC_PROJECT_ID,
+  keyFilename: process.env.GC_KEY_FILE_NAME,
+});
+
+const uploadQmsReport = async (req, res) => {
+  const { category } = req.body;
+  const report = req.files.file[0];
+  try {
+    const filename = `${uuidv4()}???${report.originalname}`;
+    const fileHandler = GoogleStorage.bucket(process.env.QMS_BUCKET).file(filename);
+
+    await fileHandler.save(report.buffer, {
+      metadata: {
+        contentType: report.mimetype,
+        metadata: {
+          category: category,
+        }
+      },
+    });
+    
+    if (category === 'manual') {
+      res.status(200).send('Manual Report Uploaded Successfully!');
+    } else if (category === 'procedure') {
+      res.status(200).send('Procedure Report Uploaded Successfully!');
+    }
+  } catch (error) {
+    res.status(502).send(`${error}`);
+    console.log(error);
+  }
+};
+
+const fetchQmsReports = async (req, res) => {
+  try {
+    const [files] = await GoogleStorage.bucket(process.env.QMS_BUCKET).getFiles();
+    const manualFiles = [];
+    const procedureFiles = [];
+    let metaDataFetched;
+    await Promise.all(files.map(async (file) => {
+      metaDataFetched = await file.getMetadata();
+      if (metaDataFetched[0].metadata?.category === 'manual') {
+        manualFiles.push({
+          fileId: file.name,
+          fileName: file.name.split('???')?.[1] ? file.name.split('???')?.[1] : file.name,
+          size: file.metadata.size,
+          date: new Date(file.metadata.timeCreated).toLocaleDateString(),
+          contentType: file.metadata.contentType,
+          category: metaDataFetched[0].metadata?.category
+        });
+      } else if (metaDataFetched[0].metadata?.category === 'procedure') {
+        procedureFiles.push({
+          fileId: file.name,
+          fileName: file.name.split('???')?.[1] ? file.name.split('???')?.[1] : file.name,
+          size: file.metadata.size,
+          date: new Date(file.metadata.timeCreated).toLocaleDateString(),
+          contentType: file.metadata.contentType,
+          category: metaDataFetched[0].metadata?.category
+        });
+      }
+    }));
+    return res.status(200).json({
+      procedureFiles,
+      manualFiles 
+    });
+  } catch (err) {
+    console.error('Error fetching files:', err);
+    return res.status(502).send(err);
+  }
+};
+
+const deleteQmsReport = async (req, res) => {
+  const { fileId } = req.body;
   
-  // TODO:
-  // Make sure to handle null case..
-  // how to stop the previous file middleware
-  // from uploading if there's no type.
-  if (type === 'manual') {
-    res.status(200).send('Manual Report Uploaded Successfully!');
-  } else if (type === 'procedure') {
-    res.status(200).send('Procedure Report Uploaded Successfully!');
+  try {
+    await GoogleStorage.bucket(process.env.QMS_BUCKET).file(fileId).delete();
+    res.status(200).send('Report deleted successfully!');
+  } catch (err) {
+    console.error('Error deleting file:', err);
+    res.status(502).send('Error deleting file:', err);
   }
 };
 
-const fetchQmsReports = (req, res) => {
-  // TODO:
-  // add code to retrieve files from
-  // google drive / cloud..
-
-  const dummyData = [
-    {
-      _id: 1,
-      fileName: "abc.pdf",
-      type: "manual",
-      downloadUrl: 'http://localhost:5005/uploads/1711398590146-banner.png',
-      date: '8/22/2020',
-    },
-    {
-      _id: 2,
-      fileName: "rwadw.pdf",
-      type: "manual",
-      downloadUrl: 'http://localhost:5005/uploads/1711398590146-banner.png',
-      date: '8/21/2020',
-    },
-    {
-      _id: 3,
-      fileName: "eawdawdawd.pdf",
-      type: "manual",
-      downloadUrl: 'http://localhost:5005/uploads/1711398590146-banner.png',
-      date: '8/20/2020',
-    },
-    {
-      _id: 4,
-      fileName: "eawdawdawd.pdf",
-      type: "manual",
-      downloadUrl: 'http://localhost:5005/uploads/1711398590146-banner.png',
-      date: '8/19/2020',
-    },
-    {
-      _id: 5,
-      fileName: "eawdawdawd.pdf",
-      type: "manual",
-      downloadUrl: 'http://localhost:5005/uploads/1711398590146-banner.png',
-      date: '8/18/2020',
-    },
-    {
-      _id: 6,
-      fileName: "eawdawdawd.pdf",
-      type: "manual",
-      downloadUrl: 'http://localhost:5005/uploads/1711398590146-banner.png',
-      date: '8/17/2020',
-    },
-    {
-      _id: 7,
-      fileName: "file-v-manual.pdf",
-      type: "procedure",
-      downloadUrl: 'http://localhost:5005/uploads/1711398590146-banner.png',
-      date: '1/22/2001',
-    },
-    {
-      _id: 8,
-      fileName: "file-x-manual.pdf",
-      type: "procedure",
-      downloadUrl: 'http://localhost:5005/uploads/1711398590146-banner.png',
-      date: '1/12/2001',
-    },
-    {
-      "_id": 9,
-      "fileName": "eawdawdawd.pdf",
-      "type": "manual",
-      "downloadUrl": "http://localhost:5005/uploads/1711398590146-banner.png",
-      "date": '8/16/2020'
-  },
-  {
-      "_id": 10,
-      "fileName": "eawdawdawd.pdf",
-      "type": "procedure",
-      "downloadUrl": "http://localhost:5005/uploads/1711398590146-banner.png",
-      "date": "1/26/2001"
-  },
-  {
-      "_id": 11,
-      "fileName": "eawdawdawd.pdf",
-      "type": "procedure",
-      "downloadUrl": "http://localhost:5005/uploads/1711398590146-banner.png",
-      "date": "1/3/2001"
-  },
-  {
-      "_id": 12,
-      "fileName": "file-v-manual.pdf",
-      "type": "procedure",
-      "downloadUrl": "http://localhost:5005/uploads/1711398590146-banner.png",
-      "date": "1/28/2001"
-  },
-  {
-      "_id": 13,
-      "fileName": "file-x-manual.pdf",
-      "type": "procedure",
-      "downloadUrl": "http://localhost:5005/uploads/1711398590146-banner.png",
-      "date": "1/31/2001"
-  },
-  {
-      "_id": 14,
-      "fileName": "eawdawdawd.pdf",
-      "type": "manual",
-      "downloadUrl": "http://localhost:5005/uploads/1711398590146-banner.png",
-      "date": '8/15/2020'
-  },
-  {
-      "_id": 15,
-      "fileName": "eawdawdawd.pdf",
-      "type": "manual",
-      "downloadUrl": "http://localhost:5005/uploads/1711398590146-banner.png",
-      "date": '8/14/2020'
-  },
-  {
-      "_id": 16,
-      "fileName": "eawdawdawd.pdf",
-      "type": "procedure",
-      "downloadUrl": "http://localhost:5005/uploads/1711398590146-banner.png",
-      "date": "1/6/2001"
-  },
-  {
-      "_id": 17,
-      "fileName": "abc.pdf",
-      "type": "procedure",
-      "downloadUrl": "http://localhost:5005/uploads/1711398590146-banner.png",
-      "date": "1/18/2001"
-  },
-  {
-      "_id": 18,
-      "fileName": "rwadw.pdf",
-      "type": "procedure",
-      "downloadUrl": "http://localhost:5005/uploads/1711398590146-banner.png",
-      "date": "1/22/2001"
-  },
-  {
-      "_id": 19,
-      "fileName": "eawdawdawd.pdf",
-      "type": "manual",
-      "downloadUrl": "http://localhost:5005/uploads/1711398590146-banner.png",
-      "date": '8/13/2020'
-  },
-  {
-      "_id": 20,
-      "fileName": "eawdawdawd.pdf",
-      "type": "procedure",
-      "downloadUrl": "http://localhost:5005/uploads/1711398590146-banner.png",
-      "date": "1/8/2001"
-  },
-  {
-      "_id": 21,
-      "fileName": "eawdawdawd.pdf",
-      "type": "procedure",
-      "downloadUrl": "http://localhost:5005/uploads/1711398590146-banner.png",
-      "date": "1/10/2001"
-  },
-  {
-      "_id": 22,
-      "fileName": "eawdawdawd.pdf",
-      "type": "procedure",
-      "downloadUrl": "http://localhost:5005/uploads/1711398590146-banner.png",
-      "date": "1/23/2001"
-  },
-  {
-      "_id": 23,
-      "fileName": "file-v-manual.pdf",
-      "type": "procedure",
-      "downloadUrl": "http://localhost:5005/uploads/1711398590146-banner.png",
-      "date": "1/9/2001"
-  },
-  {
-      "_id": 24,
-      "fileName": "file-x-manual.pdf",
-      "type": "procedure",
-      "downloadUrl": "http://localhost:5005/uploads/1711398590146-banner.png",
-      "date": "1/11/2001"
-  },
-  {
-      "_id": 25,
-      "fileName": "eawdawdawd.pdf",
-      "type": "procedure",
-      "downloadUrl": "http://localhost:5005/uploads/1711398590146-banner.png",
-      "date": "1/4/2001"
+const downloadQmsReport = async (req, res) => {
+  try {
+    const { fileId } = req.body;
+    const file = GoogleStorage.bucket(process.env.QMS_BUCKET).file(fileId);
+    const [fileExists] = await file.exists();
+    if (fileExists) {
+      const [fileBuffer] = await file.download();
+      res.send(fileBuffer);
+    }
+    else {
+      console.log('QMS: ~ File not found');
+      return res.status(404);
+    }
+  } catch (error) {
+    return res.status(502).send(error);
   }
-  ];
-  res.json(dummyData);
-};
-
-const deleteQmsReport = (req, res) => {
-
-  // TODO:
-  // Add logic for deleting a report.
-
-  res.status(200).send('Report with id ' + req.body.id + ' deleted successfully!');
-};
+}
 
 module.exports = {
-  uploadFilesToGoogleCloud,
   fetchQmsReports,
+  uploadQmsReport,
+  downloadQmsReport,
   deleteQmsReport
 };

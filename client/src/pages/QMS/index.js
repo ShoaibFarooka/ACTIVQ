@@ -5,9 +5,10 @@ import Modal from "react-modal";
 import { IoArrowDown, IoCloudUpload, IoTrashBin } from "react-icons/io5";
 import qmsService from "../../services/qmsService";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllQmsReports } from "../../redux/qmsSlice";
 import SortBar from "../../components/SortBar/Sortbar";
 import { sort } from "fast-sort";
+import FileSaver from 'file-saver';
+import { ShowLoading, HideLoading } from "../../redux/loaderSlice";
 
 // Set the app element for react-modal
 Modal.setAppElement("#root");
@@ -15,26 +16,15 @@ Modal.setAppElement("#root");
 const QMS = () => {
   const QMS_HEADERS = [
     {title: 'Filename', label: 'fileName'},
-    {title: 'Date', label: 'date'}
+    {title: 'Date', label: 'date'},
+    {title: 'Size', label: 'size'}
   ];
   const procedureInputRef = useRef();
   const manualInputRef = useRef();
-  const qmsReports = useSelector((state) => state.qms.reports);
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    dispatch(getAllQmsReports());
-  }, []);
-
-  useEffect(() => {
-    const reports = { manual: [], procedure: [] }
-    qmsReports?.forEach(item => {
-      if (item.type === 'manual') reports.manual.push(item)
-      else if (item.type === 'procedure') reports.procedure.push(item)
-    })
-    setManualReports(reports.manual);
-    setProcedureReports(reports.procedure);
-  }, [qmsReports]);
+  // State to inform for resorting.
+  const [reSortTable, setResortTable] = useState(0);
 
   // reports.
   const [manualReports, setManualReports] = useState([]);
@@ -49,18 +39,50 @@ const QMS = () => {
   const [procedureSelectSort, setProcedureSelectSort] = useState('');
 
   useEffect(() => {
+    dispatch(ShowLoading());
+    getAllQmsReports();
+  }, []);
+
+  const getAllQmsReports = async () => {
+    try {
+      const response = await qmsService.getReports({ type: '*' });
+      if (response) {
+        setManualReports(response.manualFiles);
+        setProcedureReports(response.procedureFiles);
+        dispatch(HideLoading());
+        setResortTable(reSortTable + 1);
+      }
+    } catch (error) {
+      // Handle error if needed
+      console.error("Error fetching QMS information:", error);
+    }
+  };
+
+  useEffect(() => {
     if (manualSelectSort === 'date')
-      setManualReports(sort(manualReports).desc(item => new Date(item[manualSelectSort]).setHours(0,0,0,0)));
+      setManualReports(sort(manualReports).by({
+        desc: item => new Date(item[manualSelectSort]).setHours(0,0,0,0),
+        comparer: new Intl.Collator(undefined, { caseFirst: 'false' }).compare,
+      }));
     else 
-      setManualReports(sort(manualReports).asc(item => item[manualSelectSort]));
-  }, [manualSelectSort]);
+      setManualReports(sort(manualReports).by({
+        asc: item => item[manualSelectSort],
+        comparer: new Intl.Collator(undefined, { caseFirst: 'false', numeric: manualSelectSort === 'size' }).compare,
+      }));
+  }, [manualSelectSort, reSortTable]);
 
   useEffect(() => {
     if (procedureSelectSort === 'date')
-      setProcedureReports(sort(procedureReports).desc(item => new Date(item[procedureSelectSort]).setHours(0,0,0,0)));
+      setProcedureReports(sort(procedureReports).by({
+        desc: item => new Date(item[procedureSelectSort]).setHours(0,0,0,0),
+        comparer: new Intl.Collator(undefined, { caseFirst: 'false' }).compare,
+      }));
     else
-      setProcedureReports(sort(procedureReports).asc(item => item[procedureSelectSort]));
-  }, [procedureSelectSort]);
+      setProcedureReports(sort(procedureReports).by({
+        asc: item => item[procedureSelectSort],
+        comparer: new Intl.Collator(undefined, { caseFirst: 'false', numeric: procedureSelectSort === 'size' }).compare,
+      }));
+  }, [procedureSelectSort, reSortTable]);
 
   return (
     <>
@@ -89,18 +111,18 @@ const QMS = () => {
                   try {
                     const file = manualUpload;
                     const response = await qmsService.uploadReport({
-                      type: "manual",
+                      category: "manual",
                       file,
                     });
                     setManualUpload(null);
                     manualInputRef.current.value = null;
                     message.success(response);
-                    dispatch(getAllQmsReports());
+                    getAllQmsReports();
                   } catch (error) {
                     setManualUpload(null);
                     manualInputRef.current.value = null;
                     message.success(error.response.data);
-                    dispatch(getAllQmsReports());
+                    getAllQmsReports();
                   }
                 }}
               >
@@ -126,6 +148,8 @@ const QMS = () => {
           <thead>
             <tr>
               <th>Filename</th>
+              <th>Size</th>
+              <th>Content Type</th>
               <th>Date</th>
               <th>Action</th>
             </tr>
@@ -134,18 +158,33 @@ const QMS = () => {
             {manualReports &&
               manualReports
                 .map((manualItem) => (
-                  <tr key={manualItem._id}>
+                  <tr key={manualItem.fileId}>
                     <td>{manualItem.fileName}</td>
-                    <td>{convertDateFormat(manualItem.date)}</td>
+                    <td>{(Number(manualItem.size) / 1024).toFixed(2) + ' KB'}</td>
+                    <td>{manualItem.contentType}</td>
+                    <td>{new Date(manualItem.date).toDateString()}</td>
                     <td>
                       <div className="action-icons-container">
-                        <a href={manualItem.downloadUrl} download target="_blank" rel="noreferrer">
-                          <IoArrowDown
-                            size={20}
-                            className="action-icon"
-                            color="black"
-                          />
-                        </a>
+                        <IoArrowDown
+                          size={20}
+                          className="action-icon"
+                          color="black"
+                          onClick={async () => {
+                            try {
+                              const buffer = await qmsService.downloadReport({
+                                fileId: manualItem.fileId,
+                                contentType: manualItem.contentType
+                              })
+                              console.log(buffer);
+                              FileSaver.saveAs(new Blob([buffer], { type: manualItem.contentType }), manualItem.fileName);
+                              message.success('File downloaded!');
+                              getAllQmsReports();
+                            } catch (error) {
+                              message.error(`${error}`);
+                              getAllQmsReports();
+                            }
+                          }}
+                        />
                         <IoTrashBin
                           size={20}
                           className="action-icon"
@@ -154,17 +193,13 @@ const QMS = () => {
                             try {
                               message.success(
                                 await qmsService.deleteReport({
-                                  id: manualItem._id,
+                                  fileId: manualItem.fileId,
                                 })
                               );
-                              dispatch(getAllQmsReports());
+                              getAllQmsReports();
                             } catch (error) {
-                              message.error(
-                                await qmsService.deleteReport({
-                                  id: manualItem._id,
-                                })
-                              );
-                              dispatch(getAllQmsReports());
+                              message.error(`${error}`);
+                              getAllQmsReports();
                             }
                           }}
                         />
@@ -200,18 +235,18 @@ const QMS = () => {
                   try {
                     const file = procedureUpload;
                     const response = await qmsService.uploadReport({
-                      type: "procedure",
+                      category: "procedure",
                       file,
                     });
                     setProcedureUpload(null);
                     procedureInputRef.current.value = null;
                     message.success(response);
-                    dispatch(getAllQmsReports());
+                    getAllQmsReports();
                   } catch (error) {
                     setProcedureUpload(null);
                     procedureInputRef.current.value = null;
                     message.error(error.response.data);
-                    dispatch(getAllQmsReports());
+                    getAllQmsReports();
                   }
                 }}
               >
@@ -237,6 +272,8 @@ const QMS = () => {
           <thead>
             <tr>
               <th>Filename</th>
+              <th>Size</th>
+              <th>Content Type</th>
               <th>Date</th>
               <th>Action</th>
             </tr>
@@ -245,18 +282,32 @@ const QMS = () => {
             {procedureReports &&
               procedureReports
                 .map((procedureItem) => (
-                  <tr key={procedureItem._id}>
+                  <tr key={procedureItem.fileId}>
                     <td>{procedureItem.fileName}</td>
-                    <td>{convertDateFormat(procedureItem.date)}</td>
+                    <td>{(Number(procedureItem.size) / 1024).toFixed(2) + ' KB'}</td>
+                    <td>{procedureItem.contentType}</td>
+                    <td>{new Date(procedureItem.date).toDateString()}</td>
                     <td>
                       <div className="action-icons-container">
-                        <a href={procedureItem.downloadUrl} download target="_blank" rel="noreferrer">
-                          <IoArrowDown
-                            size={20}
-                            className="action-icon"
-                            color="black"
-                          />
-                        </a>
+                        <IoArrowDown
+                          size={20}
+                          className="action-icon"
+                          color="black"
+                          onClick={async () => {
+                            try {
+                              const buffer = await qmsService.downloadReport({
+                                fileId: procedureItem.fileId,
+                                contentType: procedureItem.contentType
+                              })
+                              FileSaver.saveAs(new Blob([buffer], { type: procedureItem.contentType }), procedureItem.fileName);
+                              message.success('File downloaded!');
+                              getAllQmsReports();
+                            } catch (error) {
+                              message.error(`${error}`);
+                              getAllQmsReports();
+                            }
+                          }}
+                        />
                         <IoTrashBin
                           size={20}
                           className="action-icon"
@@ -265,17 +316,13 @@ const QMS = () => {
                             try {
                               message.success(
                                 await qmsService.deleteReport({
-                                  id: procedureItem._id,
+                                  fileId: procedureItem.fileId,
                                 })
                               );
-                              dispatch(getAllQmsReports());
+                              getAllQmsReports();
                             } catch (error) {
-                              message.error(
-                                await qmsService.deleteReport({
-                                  id: procedureItem._id,
-                                })
-                              );
-                              dispatch(getAllQmsReports());
+                              message.error(`${error}`);
+                              getAllQmsReports();
                             }
                           }}
                         />
@@ -290,17 +337,8 @@ const QMS = () => {
   );
 };
 
-function convertDateFormat(inputDate) {
-  // Split the input date into month, day, and year
-  var parts = inputDate.split("/");
-  var month = parts[0];
-  var day = parts[1];
-  var year = parts[2];
-
-  // Reformat the date into DD/MM/YYYY format
-  var formattedDate = day + "/" + month + "/" + year;
-
-  return formattedDate;
+function bytesToKB(bytes) {
+  return bytes / 1024; // 1 KB = 1024 bytes
 }
 
 export default QMS;

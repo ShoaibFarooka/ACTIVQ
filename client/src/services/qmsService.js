@@ -1,10 +1,10 @@
 import axiosInstance from "./axiosInstance";
 
 const qmsService = {
-  uploadReport: async ({ type, file }) => {
+  uploadReport: async ({ category, file }) => {
     try {
       const formData = new FormData();
-      formData.append("type", type);
+      formData.append("category", category);
       formData.append("file", file);
 
       const response = await axiosInstance.post(
@@ -29,9 +29,23 @@ const qmsService = {
       throw error;
     }
   },
-  deleteReport: async ({ id }) => {
+  deleteReport: async ({ fileId }) => {
     try {
-      const response = await axiosInstance.post("/qms/delete-report", { id });
+      const response = await axiosInstance.post("/qms/delete-report", { fileId });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  downloadReport: async ({ fileId, contentType }) => {
+    try {
+      const response = await axiosInstance.post("/qms/download-report", { fileId }, {
+        responseType: 'arraybuffer',
+        headers: {
+          Accept: contentType,
+        },
+      });
       return response.data;
     } catch (error) {
       throw error;

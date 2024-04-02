@@ -39,7 +39,10 @@ const Clients = () => {
     }
 
     useEffect(() => {
-        setFilteredClients(sort(filteredClients).asc(item => item[selectedSort]))
+        setFilteredClients(sort(filteredClients).by({
+            asc: item => item[selectedSort],
+            comparer: new Intl.Collator(undefined, { caseFirst: 'false' }).compare,
+        }))
     }, [selectedSort])
 
     const fetchEquipments = async () => {
@@ -142,7 +145,10 @@ const Clients = () => {
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                         <SearchBar
                             items={clients}
-                            onResults={(results) => setFilteredClients(sort(results).asc(item => item[selectedSort]))}
+                            onResults={(results) => setFilteredClients(sort(results).by({
+                                asc: item => item[selectedSort],
+                                comparer: new Intl.Collator(undefined, { caseFirst: 'false' }).compare,
+                            }))}
                             excludedItems={['_id', 'type', 'email']}
                         />
                         <SortBar items={CLIENT_HEADERS} onChange={handleSelectedSort}/>

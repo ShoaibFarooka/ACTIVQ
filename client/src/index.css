@@ -11,3 +11,8 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Overriding react-modal css for higher z-index */
+.ReactModal__Overlay {
+  z-index: 10000;
+}

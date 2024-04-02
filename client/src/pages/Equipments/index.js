@@ -118,6 +118,7 @@ const Equipments = () => {
     const handleRemind = async (equipment) => {
         dispatch(ShowLoading());
         try {
+            equipment.nextCalibDate = getNextCalibrationDate(equipment);
             const response = await equipmentService.remindOwner(equipment);
             message.success(response);
         } catch (error) {
@@ -145,7 +146,7 @@ const Equipments = () => {
         }
         const timeDifference = nextCalibrationDate.getTime() - Date.now();
         const daysUntilCalibration = Math.ceil(timeDifference / (1000 * 60 * 60 * 24));
-        if (daysUntilCalibration > 30) {
+        if (daysUntilCalibration <= 30) {
             return 'highlight';
         }
         else {

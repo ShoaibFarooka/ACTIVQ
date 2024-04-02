@@ -4,15 +4,7 @@ const controller = require("../controllers/qmsController");
 const authMiddleware = require("../middleware/authMiddleware");
 
 // Images Storage
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, "Photos/");
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + "-" + file.originalname);
-    },
-});
-
+const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 router.post(
@@ -20,7 +12,7 @@ router.post(
     authMiddleware.stripToken,
     authMiddleware.verifyToken,
     upload.fields([{ name: 'file' }]),
-    controller.uploadFilesToGoogleCloud
+    controller.uploadQmsReport
 );
 router.post(
     "/get-reports",
@@ -34,6 +26,13 @@ router.post(
     authMiddleware.stripToken,
     authMiddleware.verifyToken,
     controller.deleteQmsReport
+);
+
+router.post(
+    "/download-report",
+    authMiddleware.stripToken,
+    authMiddleware.verifyToken,
+    controller.downloadQmsReport
 );
 
 module.exports = router;
