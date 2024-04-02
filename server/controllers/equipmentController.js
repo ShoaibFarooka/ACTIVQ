@@ -214,12 +214,13 @@ const AddCalibrationDetails = async (req, res) => {
 };
 
 const RemindOwnerViaMail = async (req, res) => {
-    const { ownerName, claibrationDetails, code, manufacturer, model, serialNo, owner } = req.body;
-    const formattedNextCallibrationDate = new Date(claibrationDetails[0].dateOfCalibration).toDateString();
+    const { ownerName, nextCalibDate, code, manufacturer, model, serialNo, owner } = req.body;
+    const formattedNextCallibrationDate = new Date(nextCalibDate).toDateString();
     
     let mailOptions = {
         from: process.env.SENDER_EMAIL,
         to: owner.email,
+        cc: 'darabmonib123@gmail.com',
         subject: 'Calibration Reminder for Equipment',
         text: 
         `

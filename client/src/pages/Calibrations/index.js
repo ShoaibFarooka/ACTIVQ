@@ -45,7 +45,10 @@ const Calibrations = () => {
     }
 
     useEffect(() => {
-        setFilteredEquipments(sort(filteredEquipments).asc(item => item[selectedSort]))
+        setFilteredEquipments(sort(filteredEquipments).by({
+            asc: item => item[selectedSort],
+            comparer: new Intl.Collator(undefined, { caseFirst: 'false' }).compare,
+        }))
     }, [selectedSort])
 
     const fetchEquipments = async () => {
@@ -111,7 +114,10 @@ const Calibrations = () => {
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                     <SearchBar
                         items={equipments}
-                        onResults={(results) => setFilteredEquipments(sort(results).asc(item => item[selectedSort]))}
+                        onResults={(results) => setFilteredEquipments(sort(results).by({
+                            asc: item => item[selectedSort],
+                            comparer: new Intl.Collator(undefined, { caseFirst: 'false' }).compare,
+                        }))}
                         excludedItems={['_id', 'type']}
                     />
                     <SortBar items={EQUIPMENT_HEADERS} onChange={handleSelectedSort}/>
