@@ -38,6 +38,64 @@ const QMS = () => {
   const [manualSelectSort, setManualSelectSort] = useState('');
   const [procedureSelectSort, setProcedureSelectSort] = useState('');
 
+  const handleManualReportUpload = async () => {
+    try {
+      const response = await qmsService.uploadReport({
+        category: "manual",
+        file: manualUpload,
+      });
+      message.success(response);
+    } catch (error) {
+      message.success(error.response.data);
+    }
+    setManualUpload(null);
+    manualInputRef.current.value = null;
+    getAllQmsReports();
+  }
+
+  const handleProcedureReportUpload = async () => {
+    try {
+      const response = await qmsService.uploadReport({
+        category: "procedure",
+        file: procedureUpload,
+      });
+      message.success(response);
+    } catch (error) {
+      message.success(error.response.data);
+    }
+    setProcedureUpload(null);
+    procedureInputRef.current.value = null;
+    getAllQmsReports();
+  }
+
+  const handleDownloadReport = async (item) => {
+    try {
+      const buffer = await qmsService.downloadReport({
+        fileId: item.fileId,
+        contentType: item.contentType
+      })
+      FileSaver.saveAs(new Blob([buffer], { type: item.contentType }), item.fileName);
+      message.success('File downloaded!');
+    } catch (error) {
+      message.error(`${error}`);
+    }
+    getAllQmsReports();
+  }
+
+  const handleDeleteReport = async (item) => {
+    try {
+      message.success(
+        await qmsService.deleteReport({
+          fileId: item.fileId,
+        })
+      );
+    } catch (error) {
+      console.log('Error occured.', error);
+      message.error(`${error}`);
+    }
+    getAllQmsReports();
+  }
+
   useEffect(() => {
     dispatch(ShowLoading());
     getAllQmsReports();
@@ -49,39 +107,38 @@ const QMS = () => {
       if (response) {
         setManualReports(response.manualFiles);
         setProcedureReports(response.procedureFiles);
-        dispatch(HideLoading());
         setResortTable(reSortTable + 1);
       }
     } catch (error) {
       // Handle error if needed
       console.error("Error fetching QMS information:", error);
     }
+    dispatch(HideLoading());
   };
 
+  const sortReports = (reports, sortKey, sortBy) => {
+    const sortOrder = sortBy === 'date' ? 'desc' : 'asc';
+    const sortingFunction = sortBy === 'date'
+      ? item => new Date(item[sortKey]).setHours(0, 0, 0, 0)
+      : item => item[sortKey];
+    
+    const collatorOptions = { caseFirst: 'false' };
+    if (sortKey === 'size') collatorOptions.numeric = true;
+  
+    const comparer = new Intl.Collator(undefined, collatorOptions).compare;
+  
+    return sort(reports).by({
+      [sortOrder]: sortingFunction,
+      comparer: comparer,
+    });
+  };
+  
   useEffect(() => {
-    if (manualSelectSort === 'date')
-      setManualReports(sort(manualReports).by({
-        desc: item => new Date(item[manualSelectSort]).setHours(0,0,0,0),
-        comparer: new Intl.Collator(undefined, { caseFirst: 'false' }).compare,
-      }));
-    else 
-      setManualReports(sort(manualReports).by({
-        asc: item => item[manualSelectSort],
-        comparer: new Intl.Collator(undefined, { caseFirst: 'false', numeric: manualSelectSort === 'size' }).compare,
-      }));
+    setManualReports(sortReports(manualReports, manualSelectSort, manualSelectSort));
   }, [manualSelectSort, reSortTable]);
-
+  
   useEffect(() => {
-    if (procedureSelectSort === 'date')
-      setProcedureReports(sort(procedureReports).by({
-        desc: item => new Date(item[procedureSelectSort]).setHours(0,0,0,0),
-        comparer: new Intl.Collator(undefined, { caseFirst: 'false' }).compare,
-      }));
-    else
-      setProcedureReports(sort(procedureReports).by({
-        asc: item => item[procedureSelectSort],
-        comparer: new Intl.Collator(undefined, { caseFirst: 'false', numeric: procedureSelectSort === 'size' }).compare,
-      }));
+    setProcedureReports(sortReports(procedureReports, procedureSelectSort, procedureSelectSort));
   }, [procedureSelectSort, reSortTable]);
 
   return (
@@ -107,24 +164,7 @@ const QMS = () => {
               </label>
               <div
                 className="btn btn-confirm"
-                onClick={async () => {
-                  try {
-                    const file = manualUpload;
-                    const response = await qmsService.uploadReport({
-                      category: "manual",
-                      file,
-                    });
-                    setManualUpload(null);
-                    manualInputRef.current.value = null;
-                    message.success(response);
-                    getAllQmsReports();
-                  } catch (error) {
-                    setManualUpload(null);
-                    manualInputRef.current.value = null;
-                    message.success(error.response.data);
-                    getAllQmsReports();
-                  }
-                }}
+                onClick={handleManualReportUpload}
               >
                 Upload
               </div>
@@ -136,9 +176,7 @@ const QMS = () => {
           <input
             multiple={false}
             ref={manualInputRef}
-            onChange={(ev) => {
-              setManualUpload(ev.target.files[0]);
-            }}
+            onChange={(ev) => setManualUpload(ev.target.files[0])}
             type="file"
             id="manual-upload"
             style={{ display: "none" }}
@@ -169,39 +207,13 @@ const QMS = () => {
                           size={20}
                           className="action-icon"
                           color="black"
-                          onClick={async () => {
-                            try {
-                              const buffer = await qmsService.downloadReport({
-                                fileId: manualItem.fileId,
-                                contentType: manualItem.contentType
-                              })
-                              console.log(buffer);
-                              FileSaver.saveAs(new Blob([buffer], { type: manualItem.contentType }), manualItem.fileName);
-                              message.success('File downloaded!');
-                              getAllQmsReports();
-                            } catch (error) {
-                              message.error(`${error}`);
-                              getAllQmsReports();
-                            }
-                          }}
+                          onClick={() => handleDownloadReport(manualItem)}
                         />
                         <IoTrashBin
                           size={20}
                           className="action-icon"
                           color="#C93616"
-                          onClick={async () => {
-                            try {
-                              message.success(
-                                await qmsService.deleteReport({
-                                  fileId: manualItem.fileId,
-                                })
-                              );
-                              getAllQmsReports();
-                            } catch (error) {
-                              message.error(`${error}`);
-                              getAllQmsReports();
-                            }
-                          }}
+                          onClick={() => handleDeleteReport(manualItem)}
                         />
                       </div>
                     </td>
@@ -231,24 +243,7 @@ const QMS = () => {
               </label>
               <div
                 className="btn btn-confirm"
-                onClick={async () => {
-                  try {
-                    const file = procedureUpload;
-                    const response = await qmsService.uploadReport({
-                      category: "procedure",
-                      file,
-                    });
-                    setProcedureUpload(null);
-                    procedureInputRef.current.value = null;
-                    message.success(response);
-                    getAllQmsReports();
-                  } catch (error) {
-                    setProcedureUpload(null);
-                    procedureInputRef.current.value = null;
-                    message.error(error.response.data);
-                    getAllQmsReports();
-                  }
-                }}
+                onClick={handleProcedureReportUpload}
               >
                 Upload
               </div>
@@ -260,9 +255,7 @@ const QMS = () => {
           <input
             multiple={false}
             ref={procedureInputRef}
-            onChange={(ev) => {
-              setProcedureUpload(ev.target.files[0]);
-            }}
+            onChange={(ev) => setProcedureUpload(ev.target.files[0])}
             type="file"
             id="procedure-upload"
             style={{ display: "none" }}
@@ -293,38 +286,13 @@ const QMS = () => {
                           size={20}
                           className="action-icon"
                           color="black"
-                          onClick={async () => {
-                            try {
-                              const buffer = await qmsService.downloadReport({
-                                fileId: procedureItem.fileId,
-                                contentType: procedureItem.contentType
-                              })
-                              FileSaver.saveAs(new Blob([buffer], { type: procedureItem.contentType }), procedureItem.fileName);
-                              message.success('File downloaded!');
-                              getAllQmsReports();
-                            } catch (error) {
-                              message.error(`${error}`);
-                              getAllQmsReports();
-                            }
-                          }}
+                          onClick={() => handleDownloadReport(procedureItem)}
                         />
                         <IoTrashBin
                           size={20}
                           className="action-icon"
                           color="#C93616"
-                          onClick={async () => {
-                            try {
-                              message.success(
-                                await qmsService.deleteReport({
-                                  fileId: procedureItem.fileId,
-                                })
-                              );
-                              getAllQmsReports();
-                            } catch (error) {
-                              message.error(`${error}`);
-                              getAllQmsReports();
-                            }
-                          }}
+                          onClick={() => handleDeleteReport(procedureItem)}
                         />
                       </div>
                     </td>
@@ -336,9 +304,5 @@ const QMS = () => {
     </>
   );
 };
-
-function bytesToKB(bytes) {
-  return bytes / 1024; // 1 KB = 1024 bytes
-}
 
 export default QMS;

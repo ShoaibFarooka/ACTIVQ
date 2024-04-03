@@ -39,9 +39,8 @@ mongoose.connect(DB)
             res.send('Server is Up!');
         });
 
-        //Serve Images
+        // Serve Images
         app.use('/uploads', express.static(path.join(__dirname, 'Photos')));
-        app.use('/photo-signatures', express.static(path.join(__dirname, 'photo-signatures')));
 
         // Routes
         app.use("/users", userRoutes);
