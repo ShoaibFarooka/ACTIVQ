@@ -26,9 +26,14 @@ const equipmentSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    type: {
+    category: {
         type: String,
         required: true
+    },
+    referenceTable: {
+        degreeC: [],
+        correction: [],
+        u2k: [],
     },
     claibrationDetails: [
         {

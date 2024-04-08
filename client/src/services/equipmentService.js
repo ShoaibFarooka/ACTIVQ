@@ -33,6 +33,14 @@ const equipmentService = {
             throw error;
         }
     },
+    updateEquipmentParameters: async (payload, equipmentId) => {
+        try {
+            const response = await axiosInstance.put(`/equipments/update-equipment-parameters/${equipmentId}`, payload);
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
     getEquipmentReport: async (equipmentId) => {
         try {
             const response = await axiosInstance.get(`/equipments/get-equipment-report/${equipmentId}`);

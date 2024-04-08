@@ -54,8 +54,8 @@ const DeleteEquipment = async (req, res) => {
 
 const AddEquipment = async (req, res) => {
     try {
-        const { owner, code, description, manufacturer, model, serialNo, type } = req.body;
-        if (!code || !description || !manufacturer || !model || !serialNo || !type) {
+        const { owner, code, description, manufacturer, model, serialNo, category, referenceTable } = req.body;
+        if (!code || !description || !manufacturer || !model || !serialNo || !category) {
             return res.status(400).send('Invalid data');
         }
         const operatorId = res.locals.payload.id;
@@ -72,7 +72,8 @@ const AddEquipment = async (req, res) => {
                     manufacturer,
                     model,
                     serialNo,
-                    type
+                    category,
+                    referenceTable
                 };
                 if (owner) {
                     equipmentData.owner = owner;
@@ -95,9 +96,9 @@ const AddEquipment = async (req, res) => {
 
 const UpdateEquipment = async (req, res) => {
     try {
-        const { owner, code, description, manufacturer, model, serialNo, type, nextProposedCalibrationDuration } = req.body;
+        const { owner, code, description, manufacturer, model, serialNo, category, nextProposedCalibrationDuration, referenceTable } = req.body;
         const equipmentId = req.params.equipmentId;
-        if (!code || !description || !manufacturer || !model || !serialNo || !type) {
+        if (!code || !description || !manufacturer || !model || !serialNo || !category) {
             return res.status(400).send('Invalid data');
         }
         const operatorId = res.locals.payload.id;
@@ -114,7 +115,8 @@ const UpdateEquipment = async (req, res) => {
                     manufacturer,
                     model,
                     serialNo,
-                    type
+                    category,
+                    referenceTable
                 };
                 if (owner) {
                     equipmentData.owner = owner;
@@ -130,6 +132,36 @@ const UpdateEquipment = async (req, res) => {
                 else {
                     return res.status(400).send('Unable to update equipment');
                 }
+            }
+        }
+        res.status(401).send('Unauthorized');
+    } catch (error) {
+        res.status(500).send('Internal Server Error');
+        throw error;
+    }
+};
+
+const UpdateEquipmentParameters = async (req, res) => {
+    try {
+        const { parameters } = req.body;
+        const equipmentId = req.params.equipmentId;
+        if (!parameters) {
+            return res.status(400).send('Invalid data');
+        }
+        const operatorId = res.locals.payload.id;
+        const operator = await User.findById(operatorId);
+
+        if (operator?.role === 'admin' || operator?.role === 'manager') {
+            const equipmentData = {
+                referenceTable: parameters
+            };
+            console.log(equipmentId, equipmentData);
+            const updatedEquipment = await Equipment.findByIdAndUpdate(equipmentId, equipmentData);
+            if (updatedEquipment) {
+                return res.status(200).send('Equipment parameters updated successfully');
+            }
+            else {
+                return res.status(400).send('Unable to update equipment parameters');
             }
         }
         res.status(401).send('Unauthorized');
@@ -253,6 +285,7 @@ module.exports = {
     DeleteEquipment,
     AddEquipment,
     UpdateEquipment,
+    UpdateEquipmentParameters,
     GetEquipmentReport,
     AddCalibrationDetails,
     RemindOwnerViaMail

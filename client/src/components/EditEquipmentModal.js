@@ -13,9 +13,13 @@ const EditEquipmentModal = ({ isOpen, onRequestClose, fetchEquipments, Equipment
         manufacturer: Equipment.manufacturer,
         model: Equipment.model,
         serialNo: Equipment.serialNo,
+        category: Equipment.category,
+        nextProposedCalibrationDuration: Equipment.claibrationDetails[Equipment.claibrationDetails.length - 1]?.nextProposedCalibrationDuration || '',
+        referenceTable: Equipment.referenceTable,
         type: Equipment.type,
-        nextProposedCalibrationDuration: Equipment.claibrationDetails[Equipment.claibrationDetails.length - 1]?.nextProposedCalibrationDuration || ''
+        accurayOfMeasurement: Equipment.accurayOfMeasurement
     });
+    const [showParametersTable, setShowParametersTable] = useState(false);
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData((prevData) => ({
@@ -24,8 +28,20 @@ const EditEquipmentModal = ({ isOpen, onRequestClose, fetchEquipments, Equipment
         }));
     };
 
+    const handleReferenceTableValueUpdate = (updatedValue, index, column) => {
+      const selectedColumn = [...formData.referenceTable[column]];
+      selectedColumn[index] = { ...selectedColumn[index], value: updatedValue };
+      setFormData({
+        ...formData,
+        referenceTable: {
+          ...formData.referenceTable,
+          [column]: selectedColumn,
+        },
+      });
+    };
+
     const handleUpdateEquipment = async () => {
-        if (!formData.code || !formData.description || !formData.manufacturer || !formData.model || !formData.serialNo || !formData.type) {
+        if (!formData.code || !formData.description || !formData.manufacturer || !formData.model || !formData.serialNo || !formData.category) {
             return message.error('Please fill all fields!');
         }
         try {
@@ -73,7 +89,7 @@ const EditEquipmentModal = ({ isOpen, onRequestClose, fetchEquipments, Equipment
                         />
                     </div>
                     <div>
-                        <label htmlFor='description'> Description: </label>
+                        <label htmlFor='description'>Description: </label>
                         <textarea
                             id='description'
                             name="description"
@@ -119,11 +135,100 @@ const EditEquipmentModal = ({ isOpen, onRequestClose, fetchEquipments, Equipment
                             value={formData.type}
                             onChange={handleInputChange}
                         >
-                            <option value="" disabled>Please Select Equipment Type</option>
+                            <option value="" disabled selected>Please Select Equipment Type</option>
+                            <option value="thermometer">Thermometer</option>
+                            <option value="placeholder_1">placeholder 1</option>
+                            <option value="placeholder_2">placeholder 2</option>
+                            <option value="placeholder_3">placeholder 3</option>
+                            <option value="placeholder_4">placeholder 4</option>
+                        </select>
+                    </div>
+                    {formData.type === 'thermometer' && (
+                        <input
+                         type="number"
+                         name='accurayOfMeasurement' 
+                         placeholder='Accuracy of measurement in °C' 
+                         onChange={handleInputChange}
+                        />
+                    )}
+                    <div>
+                        <label htmlFor='category'>Category: </label>
+                        <select
+                            name="category"
+                            id='category'
+                            value={formData.category}
+                            onChange={(e) => {
+                                if (e.target.value !== 'reference') {
+                                    setShowParametersTable(false);
+                                }
+                                handleInputChange(e);
+                            }}
+                        >
+                            <option value="" disabled>Please Select Equipment Category</option>
                             <option value="reference">Reference</option>
                             <option value="client">Client</option>
                         </select>
                     </div>
+                    {formData.category === "reference" && !showParametersTable ? (
+                        <div className="btn-div" style={{ justifyContent: "start" }}>
+                        <button
+                            id="btn-1"
+                            className="btn"
+                            type="button"
+                            onClick={() => setShowParametersTable(true)}
+                        >
+                            Parameters
+                        </button>
+                        </div>
+                    ) : (
+                        <></>
+                    )}
+                    {formData.category === "reference" && showParametersTable && (
+                        <div>
+                        <table border="1">
+                            <thead>
+                            <tr>
+                                <th style={{ padding: 6 }}>°C</th>
+                                <th style={{ padding: 6 }}>Correction</th>
+                                <th style={{ padding: 6 }}>U(2K)</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {formData.referenceTable.degreeC.map((item, index) => (
+                                <tr key={index}>
+                                <td style={{ padding: 6 }}>
+                                    <input
+                                        className={Equipment.referenceTable.degreeC[index].value.trim() !== "" ? "green" : "red"}
+                                        onChange={(e) => {
+                                            handleReferenceTableValueUpdate(e.target.value, index, 'degreeC')
+                                        }}
+                                        defaultValue={item.value}
+                                    />
+                                </td>
+                                <td style={{ padding: 6 }}>
+                                    <input
+                                        className={Equipment.referenceTable.correction[index].value.trim() !== "" ? "green" : "red"}
+                                        onChange={(e) => {
+                                            handleReferenceTableValueUpdate(e.target.value, index, 'correction')
+                                        }}
+                                        defaultValue={formData.referenceTable.correction[index].value}
+                                    />
+                                </td>
+                                <td style={{ padding: 6 }}>
+                                    <input
+                                        className={Equipment.referenceTable.u2k[index].value.trim() !== "" ? "green" : "red"}
+                                        onChange={(e) => {
+                                            handleReferenceTableValueUpdate(e.target.value, index, 'u2k')
+                                        }}
+                                        defaultValue={formData.referenceTable.u2k[index].value}
+                                    />
+                                </td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
+                        </div>
+                    )}
                     {formData.nextProposedCalibrationDuration &&
                         <div>
                             <label htmlFor='nextProposedCalibrationDuration'>Next Proposed Calibration Duration: </label>

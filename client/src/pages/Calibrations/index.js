@@ -61,7 +61,7 @@ const Calibrations = () => {
                     filteredEquipment.ownerName = filteredEquipment.owner?.name;
                     return filteredEquipment;
                 });
-                const sortedEquipments = filteredEquipments.sort((a, b) => a.type.localeCompare(b.type));
+                const sortedEquipments = filteredEquipments.sort((a, b) => a?.type?.localeCompare(b?.type));
                 setEquipments(sortedEquipments);
             }
         } catch (error) {
@@ -118,7 +118,7 @@ const Calibrations = () => {
                             asc: item => item[selectedSort],
                             comparer: new Intl.Collator(undefined, { caseFirst: 'false' }).compare,
                         }))}
-                        excludedItems={['_id', 'type']}
+                        excludedItems={['_id', 'category']}
                     />
                     <SortBar items={EQUIPMENT_HEADERS} onChange={handleSelectedSort}/>
                 </div>
@@ -131,7 +131,7 @@ const Calibrations = () => {
                             <th>Manufacturer</th>
                             <th>Model</th>
                             <th>Serial No</th>
-                            <th>Type</th>
+                            <th>Category</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -144,7 +144,7 @@ const Calibrations = () => {
                                 <td>{equipment.manufacturer}</td>
                                 <td>{equipment.model}</td>
                                 <td>{equipment.serialNo}</td>
-                                <td>{equipment.type}</td>
+                                <td>{equipment.category}</td>
                                 <td>
                                     <div className='action-icons-container'>
                                         <IoPlayForward size={20} className='action-icon' color='black' onClick={() => handleCalibrate(equipment)} />

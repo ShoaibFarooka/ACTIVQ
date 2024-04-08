@@ -26,6 +26,13 @@ router.put(
     authMiddleware.verifyToken,
     controller.UpdateEquipment
 );
+router.put(
+    "/update-equipment-parameters/:equipmentId",
+    authMiddleware.stripToken,
+    authMiddleware.verifyToken,
+    controller.UpdateEquipmentParameters
+);
+
 router.get(
     "/get-equipment-report/:equipmentId",
     authMiddleware.stripToken,
