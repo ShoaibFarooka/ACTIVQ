@@ -178,7 +178,7 @@ const AddUser = async (req, res) => {
                 let photoSignatureUrl = "";
                 
                 if (req.files?.photoSignature || req.photoSignature) {
-                    photoSignatureUrl = req.files?.photoSignature ? baseUrl + '/Photos/' + req.files?.photoSignature?.[0]?.filename : req?.photoSignature;
+                    photoSignatureUrl = req.files?.photoSignature ? baseUrl + '/uploads/' + req.files?.photoSignature?.[0]?.filename : req?.photoSignature;
                     userData.photoSignature = photoSignatureUrl;
                 }
 
@@ -213,7 +213,7 @@ const UpdateUser = async (req, res) => {
         ) {
             // Update admin's photo signature.
             const baseUrl = `${req.protocol}://${req.get('host')}`;
-            const photoSignatureUrl = req.files?.photoSignature ? baseUrl + '/Photos/' + req.files?.photoSignature?.[0]?.filename : req?.photoSignature;
+            const photoSignatureUrl = req.files?.photoSignature ? baseUrl + '/uploads/' + req.files?.photoSignature?.[0]?.filename : req?.photoSignature;
             
             const updatedUser = await User.findByIdAndUpdate(userId, { photoSignature: photoSignatureUrl });
             return res.status(200).json({
@@ -256,7 +256,7 @@ const UpdateUser = async (req, res) => {
                 let photoSignatureUrl = "";
                 
                 if (req.files?.photoSignature || req.photoSignature) {
-                    photoSignatureUrl = req.files?.photoSignature ? baseUrl + '/Photos/' + req.files?.photoSignature?.[0]?.filename : req?.photoSignature;
+                    photoSignatureUrl = req.files?.photoSignature ? baseUrl + '/uploads/' + req.files?.photoSignature?.[0]?.filename : req?.photoSignature;
                     userData.photoSignature = photoSignatureUrl;
                 }
                 const updatedUser = await User.findByIdAndUpdate(userId, userData);
