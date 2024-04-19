@@ -61,8 +61,7 @@ const Calibrations = () => {
                     filteredEquipment.ownerName = filteredEquipment.owner?.name;
                     return filteredEquipment;
                 });
-                const sortedEquipments = filteredEquipments.sort((a, b) => a?.type?.localeCompare(b?.type));
-                setEquipments(sortedEquipments);
+                setEquipments(filteredEquipments);
             }
         } catch (error) {
             if (error.response.data === 'Equipments not found') {

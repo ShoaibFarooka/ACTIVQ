@@ -54,8 +54,7 @@ const Clients = () => {
                     const { __v, ...filteredEquipment } = equipment;
                     return filteredEquipment;
                 });
-                const sortedEquipments = filteredEquipments.sort((a, b) => a.type.localeCompare(b.type));
-                setEquipments(sortedEquipments);
+                setEquipments(filteredEquipments);
             }
         } catch (error) {
             if (error.response.data === 'Equipments not found') {

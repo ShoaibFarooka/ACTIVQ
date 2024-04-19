@@ -537,10 +537,6 @@ const CalibrateEquipmentModal = ({
     comments: "",
   });
 
-  useEffect(() => {
-    console.log("formData change hua", formData);
-  }, [formData]);
-
   const clearFormData = () => {
     setFormData({
       dateOfReceipt: "",
