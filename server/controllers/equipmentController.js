@@ -1,6 +1,6 @@
 const User = require("../models/userModel");
 const Equipment = require("../models/equipmentModel");
-const nodemailer = require("nodemailer"); 
+const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -268,14 +268,14 @@ const AddCalibrationDetails = async (req, res) => {
 const RemindOwnerViaMail = async (req, res) => {
     const { ownerName, nextCalibDate, code, manufacturer, model, serialNo, owner } = req.body;
     const formattedNextCallibrationDate = new Date(nextCalibDate).toDateString();
-    
+
     let mailOptions = {
         from: process.env.SENDER_EMAIL,
         to: owner.email,
         cc: 'darabmonib123@gmail.com',
         subject: 'Calibration Reminder for Equipment',
-        text: 
-        `
+        text:
+            `
 Dear ${ownerName},
         
 Just a quick reminder that the calibration for the following equipment is due soon:

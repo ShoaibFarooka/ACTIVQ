@@ -1,6 +1,6 @@
 .Navbar {
     position: fixed;
-    z-index: 1500;
+    z-index: 1;
 }
 
 .Navbar .NavRow {
