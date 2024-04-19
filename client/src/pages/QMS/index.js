@@ -39,6 +39,7 @@ const QMS = () => {
   const [procedureSelectSort, setProcedureSelectSort] = useState('');
 
   const handleManualReportUpload = async () => {
+    dispatch(ShowLoading());
     try {
       const response = await qmsService.uploadReport({
         category: "manual",
@@ -54,6 +55,7 @@ const QMS = () => {
   }
 
   const handleProcedureReportUpload = async () => {
+    dispatch(ShowLoading());
     try {
       const response = await qmsService.uploadReport({
         category: "procedure",
@@ -69,6 +71,7 @@ const QMS = () => {
   }
 
   const handleDownloadReport = async (item) => {
+    dispatch(ShowLoading());
     try {
       const buffer = await qmsService.downloadReport({
         fileId: item.fileId,
@@ -83,6 +86,7 @@ const QMS = () => {
   }
 
   const handleDeleteReport = async (item) => {
+    dispatch(ShowLoading());
     try {
       message.success(
         await qmsService.deleteReport({
@@ -150,13 +154,13 @@ const QMS = () => {
           <SortBar items={QMS_HEADERS} onChange={(selection) => setManualSelectSort(selection)} />
         </div>
           {!manualUpload ? (
-            <label for="manual-upload" className="btn btn-select">
+            <label htmlFor="manual-upload" className="btn btn-select">
               Upload File
             </label>
           ) : (
             <div style={{ display: "flex", flexDirection: "row" }}>
               <label
-                for="manual-upload"
+                htmlFor="manual-upload"
                 className="btn btn-danger"
                 style={{ marginRight: 8 }}
               >
@@ -229,13 +233,13 @@ const QMS = () => {
             <SortBar items={QMS_HEADERS} onChange={(selection) => setProcedureSelectSort(selection)} />
           </div>
           {!procedureUpload ? (
-            <label for="procedure-upload" className="btn btn-select">
+            <label htmlFor="procedure-upload" className="btn btn-select">
               Upload File
             </label>
           ) : (
             <div style={{ display: "flex", flexDirection: "row" }}>
               <label
-                for="procedure-upload"
+                htmlFor="procedure-upload"
                 className="btn btn-danger"
                 style={{ marginRight: 8 }}
               >

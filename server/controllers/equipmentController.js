@@ -54,8 +54,8 @@ const DeleteEquipment = async (req, res) => {
 
 const AddEquipment = async (req, res) => {
     try {
-        const { owner, code, description, manufacturer, model, serialNo, type } = req.body;
-        if (!code || !description || !manufacturer || !model || !serialNo || !type) {
+        const { owner, code, description, manufacturer, model, serialNo, category, parametersTable, type } = req.body;
+        if (!code || !description || !manufacturer || !model || !serialNo || !category || !type) {
             return res.status(400).send('Invalid data');
         }
         const operatorId = res.locals.payload.id;
@@ -72,10 +72,15 @@ const AddEquipment = async (req, res) => {
                     manufacturer,
                     model,
                     serialNo,
+                    category,
+                    parametersTable,
                     type
                 };
                 if (owner) {
                     equipmentData.owner = owner;
+                }
+                if (type == 'thermometer' && req.body.accuracyOfMeasurements) {
+                    equipmentData.accuracyOfMeasurements = req.body.accuracyOfMeasurements;
                 }
                 const newEquipment = await Equipment.create(equipmentData);
                 if (newEquipment) {
@@ -95,9 +100,9 @@ const AddEquipment = async (req, res) => {
 
 const UpdateEquipment = async (req, res) => {
     try {
-        const { owner, code, description, manufacturer, model, serialNo, type, nextProposedCalibrationDuration } = req.body;
+        const { owner, code, description, manufacturer, model, serialNo, category, nextProposedCalibrationDuration, parametersTable } = req.body;
         const equipmentId = req.params.equipmentId;
-        if (!code || !description || !manufacturer || !model || !serialNo || !type) {
+        if (!code || !description || !manufacturer || !model || !serialNo || !category) {
             return res.status(400).send('Invalid data');
         }
         const operatorId = res.locals.payload.id;
@@ -114,7 +119,8 @@ const UpdateEquipment = async (req, res) => {
                     manufacturer,
                     model,
                     serialNo,
-                    type
+                    category,
+                    parametersTable
                 };
                 if (owner) {
                     equipmentData.owner = owner;
@@ -130,6 +136,36 @@ const UpdateEquipment = async (req, res) => {
                 else {
                     return res.status(400).send('Unable to update equipment');
                 }
+            }
+        }
+        res.status(401).send('Unauthorized');
+    } catch (error) {
+        res.status(500).send('Internal Server Error');
+        throw error;
+    }
+};
+
+const UpdateEquipmentParameters = async (req, res) => {
+    try {
+        const { parameters } = req.body;
+        const equipmentId = req.params.equipmentId;
+        if (!parameters) {
+            return res.status(400).send('Invalid data');
+        }
+        const operatorId = res.locals.payload.id;
+        const operator = await User.findById(operatorId);
+
+        if (operator?.role === 'admin' || operator?.role === 'manager') {
+            const equipmentData = {
+                parametersTable: parameters
+            };
+            console.log(equipmentId, equipmentData);
+            const updatedEquipment = await Equipment.findByIdAndUpdate(equipmentId, equipmentData);
+            if (updatedEquipment) {
+                return res.status(200).send('Equipment parameters updated successfully');
+            }
+            else {
+                return res.status(400).send('Unable to update equipment parameters');
             }
         }
         res.status(401).send('Unauthorized');
@@ -172,6 +208,10 @@ const AddCalibrationDetails = async (req, res) => {
             workOrderNo,
             placeOfCalibration,
             nextProposedCalibrationDuration,
+            enviromentalConditions,
+            calibrationTemperature,
+            calibrationTables,
+            bathParameters
         } = req.body;
         if (!certificateNo ||
             !dateOfReceipt ||
@@ -179,7 +219,12 @@ const AddCalibrationDetails = async (req, res) => {
             !dateOfIssue ||
             !workOrderNo ||
             !placeOfCalibration ||
-            !nextProposedCalibrationDuration) {
+            !nextProposedCalibrationDuration ||
+            !enviromentalConditions ||
+            !calibrationTemperature ||
+            !calibrationTables ||
+            !bathParameters
+        ) {
             return res.status(400).send('Invalid data');
         }
         const equipmentId = req.params.equipmentId;
@@ -200,6 +245,13 @@ const AddCalibrationDetails = async (req, res) => {
                     placeOfCalibration,
                     calibratedBy: operatorId,
                     nextProposedCalibrationDuration,
+                    enviromentalConditions,
+                    calibrationTemperature,
+                    calibrationTables,
+                    bathParameters,
+                }
+                if (req.body.comments) {
+                    calibrationDetails.comments = req.body.comments;
                 }
                 existingEquipment.claibrationDetails.push(calibrationDetails);
                 await existingEquipment.save();
@@ -253,6 +305,7 @@ module.exports = {
     DeleteEquipment,
     AddEquipment,
     UpdateEquipment,
+    UpdateEquipmentParameters,
     GetEquipmentReport,
     AddCalibrationDetails,
     RemindOwnerViaMail

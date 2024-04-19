@@ -21,9 +21,9 @@ const Clients = () => {
     const CLIENT_HEADERS = [
         { title: 'Name', label: 'name' },
         { title: 'Code', label: 'code' },
-        { title: 'Address', label: 'address' },
-        { title: 'Equipment List', label: 'equipments' },
-        { title: 'General Info', label: 'generalInfo' },
+        // { title: 'Address', label: 'address' },
+        // { title: 'Equipment List', label: 'equipments' },
+        // { title: 'General Info', label: 'generalInfo' },
     ]
     const [clients, setClients] = useState([]);
     const [filteredClients, setFilteredClients] = useState([]);
@@ -43,7 +43,7 @@ const Clients = () => {
             asc: item => item[selectedSort],
             comparer: new Intl.Collator(undefined, { caseFirst: 'false' }).compare,
         }))
-    }, [selectedSort])
+    }, [selectedSort]);
 
     const fetchEquipments = async () => {
         dispatch(ShowLoading());
@@ -54,8 +54,7 @@ const Clients = () => {
                     const { __v, ...filteredEquipment } = equipment;
                     return filteredEquipment;
                 });
-                const sortedEquipments = filteredEquipments.sort((a, b) => a.type.localeCompare(b.type));
-                setEquipments(sortedEquipments);
+                setEquipments(filteredEquipments);
             }
         } catch (error) {
             if (error.response.data === 'Equipments not found') {
@@ -145,10 +144,12 @@ const Clients = () => {
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                         <SearchBar
                             items={clients}
-                            onResults={(results) => setFilteredClients(sort(results).by({
-                                asc: item => item[selectedSort],
-                                comparer: new Intl.Collator(undefined, { caseFirst: 'false' }).compare,
-                            }))}
+                            onResults={(results) => {
+                                setFilteredClients(sort(results).by({
+                                    asc: item => item[selectedSort],
+                                    comparer: new Intl.Collator(undefined, { caseFirst: 'false' }).compare,
+                                }));
+                            }}
                             excludedItems={['_id', 'type', 'email']}
                         />
                         <SortBar items={CLIENT_HEADERS} onChange={handleSelectedSort}/>

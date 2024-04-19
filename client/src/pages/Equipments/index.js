@@ -13,7 +13,8 @@ import equipmentService from '../../services/equipmentService';
 import SearchBar from '../../components/SearchBar/Searchbar';
 import SortBar from '../../components/SortBar/Sortbar';
 import { sort } from 'fast-sort';
-import { IoMailUnread } from 'react-icons/io5';
+import { IoApps, IoMailUnread } from 'react-icons/io5';
+import ParametersModal from '../../components/ParametersModal';
 
 // Set the app element for react-modal
 Modal.setAppElement('#root');
@@ -34,6 +35,12 @@ const Equipments = () => {
     const [isOpenPopup2, setIsOpenPopup2] = useState(false);
     const [editEquipment, setEditEquipment] = useState('');
     const [selectedSort, setSelectedSort] = useState('');
+
+    const [isParametersModalOpen, setIsParametersModalOpen] = useState({
+        isOpen: false,
+        equipmentId: -1
+    });
+    const [parametersTable, setParametersTable] = useState([]);
 
     function handleSelectedSort(value) {
         setSelectedSort(value);
@@ -80,8 +87,7 @@ const Equipments = () => {
                     filteredEquipment.ownerName = filteredEquipment.owner?.name;
                     return filteredEquipment;
                 });
-                const sortedEquipments = filteredEquipments.sort((a, b) => a.type.localeCompare(b.type));
-                setEquipments(sortedEquipments);
+                setEquipments(filteredEquipments);
             }
         } catch (error) {
             if (error.response.data === 'Equipments not found') {
@@ -135,6 +141,21 @@ const Equipments = () => {
         setIsOpenPopup(false);
     };
 
+    const handleCloseParametersModal = () => {
+        setIsParametersModalOpen({
+            isOpen: false,
+            equipmentId: -1
+        });
+    }
+
+    const handleOpenParametersModal = (parametersTableValue, equipmentId) => {
+        setIsParametersModalOpen({
+            isOpen: true,
+            equipmentId: equipmentId
+        });
+        setParametersTable(parametersTableValue);
+    }
+
     const handleModalOpen = (e) => {
         setIsOpenPopup(true);
     };
@@ -186,6 +207,17 @@ const Equipments = () => {
             {editEquipment &&
                 <EditEquipmentModal isOpen={isOpenPopup2} onRequestClose={handleModalClose2} fetchEquipments={fetchEquipments} Equipment={editEquipment} Clients={clients} />
             }
+            {isParametersModalOpen.isOpen && 
+            <ParametersModal 
+                isOpen={isParametersModalOpen.isOpen} 
+                onRequestClose={handleCloseParametersModal} 
+                parametersTable={parametersTable} 
+                equipmentId={isParametersModalOpen.equipmentId}
+                onUpdateParameters={() => {
+                    fetchEquipments();
+                    handleCloseParametersModal();
+                }}
+            />}
             <div className='Equipments'>
                 <div className='flex'>
                     <h2 className='title'>Equipment List</h2>
@@ -196,7 +228,7 @@ const Equipments = () => {
                                 asc: item => item[selectedSort],
                                 comparer: new Intl.Collator(undefined, { caseFirst: 'false' }).compare,
                             }))}
-                            excludedItems={['_id', 'type']}
+                            excludedItems={['_id', 'category']}
                         />
                         <SortBar items={EQUIPMENT_HEADERS} onChange={handleSelectedSort}/>
                     </div>
@@ -211,7 +243,7 @@ const Equipments = () => {
                             <th>Manufacturer</th>
                             <th>Model</th>
                             <th>Serial No</th>
-                            <th>Type</th>
+                            <th>Category</th>
                             <th>Next Calibration Date</th>
                             <th>Action</th>
                         </tr>
@@ -225,12 +257,17 @@ const Equipments = () => {
                                 <td>{equipment.manufacturer}</td>
                                 <td>{equipment.model}</td>
                                 <td>{equipment.serialNo}</td>
-                                <td>{equipment.type}</td>
+                                <td>{equipment.category}</td>
                                 <td>{getNextCalibrationDate(equipment)}</td>
                                 <td>
                                     <div className='action-icons-container'>
                                         <FaEdit size={20} className='action-icon' color='#c68642' onClick={() => handleEdit(equipment)} />
                                         <MdDelete size={22} className='action-icon' color='#C93616' onClick={() => handleDelete(equipment._id)} />
+                                        {
+                                            equipment.category === 'reference' && (
+                                                <IoApps size={20} className='action-icon' color='gray' onClick={() => handleOpenParametersModal(equipment.parametersTable, equipment._id)} />
+                                            )
+                                        }
                                         {
                                             isNextCalibrationDueSoon(equipment) === 'highlight' &&
                                             <IoMailUnread size={20} className='action-icon' color='#C93616' onClick={() => handleRemind(equipment)} />

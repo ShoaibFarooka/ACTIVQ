@@ -26,3 +26,5 @@ export const AUTHORITY = {
     level_four: 'Development, editing or validation of methods',
     level_five: 'Photo signature',
 }
+
+export const NUMBER_REGEX = /^-?[0-9]*\.?[0-9]*$/;
