@@ -4,20 +4,15 @@ import { message } from 'antd';
 import Modal from "react-modal";
 import { FaTimes } from "react-icons/fa";
 import equipmentService from "../services/equipmentService";
+import { NUMBER_REGEX } from "../utils/constants";
 
-const ParametersModal = ({ isOpen, onRequestClose, parametersTable, equipmentId }) => {
+const ParametersModal = ({ isOpen, onRequestClose, parametersTable, equipmentId, onUpdateParameters }) => {
   const [parameters, setParameters] = useState([]);
-
-  debugger;
-
   const handleUpdateParameters = async () => {
-    // if (/* fetched data === updated data */false) {
-    //   message.success('Already Up to date');
-    //   return 1;
-    // }
     try {
       const response = await equipmentService.updateEquipmentParameters({ parameters }, equipmentId);
       message.success(response);
+      onUpdateParameters();
     } catch (error) {
       message.error(error.response.data);
     }
@@ -25,20 +20,31 @@ const ParametersModal = ({ isOpen, onRequestClose, parametersTable, equipmentId 
     
   useEffect(() => {
     setParameters(parametersTable);
+    console.log('=--=:>', parametersTable);
   }, [parametersTable]);
 
-  useEffect(() => {
-    console.log('parameters', parameters);
-  }, [parameters]);
-
   const handleParametersTableUpdate = (updatedValue, index, column) => {
-    const selectedColumn = [...parametersTable[column]];
-    selectedColumn[index] = { ...selectedColumn[index], value: updatedValue }
+    if (!NUMBER_REGEX.test(updatedValue)) {
+      return;
+    }
+    const selectedColumn = [...parameters[column]];
+    selectedColumn[index] = updatedValue
     setParameters({
-      ...parametersTable,
+      ...parameters,
       [column]: selectedColumn
     })
-  }
+  };
+
+  const generateBackgroundColorClass = (local, transmitted) => {
+    // function calcs the background color for an input element.
+    if (local === "" && transmitted === "") {
+      return 'red';
+    } else if ((local !== "" && transmitted === "") || (local === "" && transmitted !== "") || (local !== transmitted)) {
+      return 'yellow';
+    } else {
+      return 'green';
+    }
+  };
 
   return (
     <Modal className="modal-1" isOpen={isOpen} onRequestClose={onRequestClose}>
@@ -59,32 +65,23 @@ const ParametersModal = ({ isOpen, onRequestClose, parametersTable, equipmentId 
               <tr key={index}>
                   <td style={{ padding: 6 }}>
                   <input
-                    className={"yellow"}
-                    
-                    onChange={(e) => {
-                      handleParametersTableUpdate(e.target.value, index, 'degreeC')
-                    }}
-                    defaultValue={item.value}
+                    className={generateBackgroundColorClass(parameters?.degreeC[index]?.trim(), parametersTable?.degreeC[index]?.trim())}
+                    onChange={(e) => handleParametersTableUpdate(e.target.value, index, 'degreeC')}
+                    value={parameters.degreeC[index] ?? ''}
                   />
                   </td>
                   <td style={{ padding: 6 }}>
                   <input
-                    className={"yellow"}
-                    
-                    onChange={(e) => {
-                      handleParametersTableUpdate(e.target.value, index, 'correction')
-                    }}
-                    defaultValue={parameters.correction[index].value}
+                    className={generateBackgroundColorClass(parameters?.correction[index]?.trim(), parametersTable?.correction[index]?.trim())}
+                    onChange={(e) => handleParametersTableUpdate(e.target.value, index, 'correction')}
+                    value={parameters.correction[index] ?? ''}
                   />
                   </td>
                   <td style={{ padding: 6 }}>
                   <input
-                    className={"yellow"}
-                    
-                    onChange={(e) => {
-                      handleParametersTableUpdate(e.target.value, index, 'u2k')
-                    }}
-                    defaultValue={parameters.u2k[index].value}
+                    className={generateBackgroundColorClass(parameters?.u2k[index]?.trim(), parametersTable?.u2k[index]?.trim())}
+                    onChange={(e) => handleParametersTableUpdate(e.target.value, index, 'u2k')}
+                    value={parameters.u2k[index] ?? ''}
                   />
                   </td>
               </tr>

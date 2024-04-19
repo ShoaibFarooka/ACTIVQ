@@ -1,5 +1,24 @@
 const mongoose = require('mongoose');
 
+// Define sub-schema for calibration table
+const CalibrationTableSchema = new mongoose.Schema({
+    referenceTemperatureInitial: {
+        type: [Number],
+        default: Array(10).fill(null), // To initialize with null values
+        required: true
+    },
+    calibratedTemperature: {
+        type: [Number],
+        default: Array(10).fill(null),
+        required: true
+    },
+    referenceTemperatureFinal: {
+        type: [Number],
+        default: Array(10).fill(null),
+        required: true
+    }
+});
+
 const equipmentSchema = new mongoose.Schema({
     owner: {
         type: mongoose.Schema.Types.ObjectId,
@@ -26,14 +45,33 @@ const equipmentSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    type: {
+        type: String,
+        required: true
+    },
+    accuracyOfMeasurements: {
+        type: Number
+    },
     category: {
         type: String,
         required: true
     },
-    referenceTable: {
-        degreeC: [],
-        correction: [],
-        u2k: [],
+    parametersTable: {
+        degreeC: {
+            type: [String],
+            default: Array(6).fill(""),
+            required: true
+        },
+        correction: {
+            type: [String],
+            default: Array(6).fill(""),
+            required: true
+        },
+        u2k: {
+            type: [String],
+            default: Array(6).fill(""),
+            required: true
+        },
     },
     claibrationDetails: [
         {
@@ -70,6 +108,33 @@ const equipmentSchema = new mongoose.Schema({
                 type: String,
                 required: true
             },
+            enviromentalConditions: {
+                temperature:[
+                    { type: Number, required: true },
+                    { type: Number, required: true }
+                ],
+                relativeHumidity:[
+                    { type: Number, required: true },
+                    { type: Number, required: true }
+                ],
+                atmosphericPressure:[
+                    { type: Number, required: true },
+                    { type: Number, required: true }
+                ]
+            },
+            bathParameters: {
+                bathStability: [
+                    { type: Number, required: true },
+                    { type: Number, required: true }
+                ],
+                bathHomogeneousness: [
+                    { type: Number, required: true },
+                    { type: Number, required: true }
+                ],
+            },
+            calibrationTemperature: { type: Number },
+            calibrationTables: [CalibrationTableSchema],
+            comments: { type: String }
         }
     ],
 },

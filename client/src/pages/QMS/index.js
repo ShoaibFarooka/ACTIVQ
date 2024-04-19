@@ -71,6 +71,7 @@ const QMS = () => {
   }
 
   const handleDownloadReport = async (item) => {
+    dispatch(ShowLoading());
     try {
       const buffer = await qmsService.downloadReport({
         fileId: item.fileId,

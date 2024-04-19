@@ -1,17 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import "../styles/UserModal.css";
 import Modal from "react-modal";
 import { FaTimes } from "react-icons/fa";
 import { message } from "antd";
 import equipmentService from "../services/equipmentService";
-const DEFAULT_REFERENCE_TABLE = [
-    { value: "" },
-    { value: "" },
-    { value: "" },
-    { value: "" },
-    { value: "" },
-    { value: "" },
-];
+import { NUMBER_REGEX } from "../utils/constants"
 
 const AddEquipmentModal = ({
   isOpen,
@@ -19,8 +12,6 @@ const AddEquipmentModal = ({
   fetchEquipments,
   Clients,
 }) => {
-  const [showParametersTable, setShowParametersTable] = useState(false);
-
   const [formData, setFormData] = useState({
     owner: "",
     code: "",
@@ -29,24 +20,9 @@ const AddEquipmentModal = ({
     model: "",
     serialNo: "",
     category: "",
-    referenceTable: {
-      degreeC: [...DEFAULT_REFERENCE_TABLE],
-      correction: [...DEFAULT_REFERENCE_TABLE],
-      u2k: [...DEFAULT_REFERENCE_TABLE],
-    },
     type: "",
-    accurayOfMeasurement: ""
+    accuracyOfMeasurements: ""
   });
-
-  const resetParametersTable = () => {
-    setFormData({...formData, 
-      referenceTable: {
-        degreeC: [...DEFAULT_REFERENCE_TABLE],
-        correction: [...DEFAULT_REFERENCE_TABLE],
-        u2k: [...DEFAULT_REFERENCE_TABLE],
-      }
-    })
-  }
 
   const clearFormData = () => {
     setFormData({
@@ -57,35 +33,26 @@ const AddEquipmentModal = ({
       model: "",
       serialNo: "",
       category: "",
-      referenceTable: {
-        degreeC: [...DEFAULT_REFERENCE_TABLE],
-        correction: [...DEFAULT_REFERENCE_TABLE],
-        u2k: [...DEFAULT_REFERENCE_TABLE],
-      },
       type: "",
-      accurayOfMeasurement: ""
+      accuracyOfMeasurements: ""
     });
   };
 
   const handleInputChange = (e) => {
+    const forceNumeric = [
+      'accuracyOfMeasurements'
+    ];
     const { name, value } = e.target;
+    if (forceNumeric.includes(name)) { 
+      if (!NUMBER_REGEX.test(value)) {
+        return;
+      }
+    }
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
   };
-
-  const handleReferenceTableValueUpdate = (updatedValue, index, column) => {
-    const selectedColumn = [...formData.referenceTable[column]];
-    selectedColumn[index] = { ...selectedColumn[index], value: updatedValue }
-    setFormData({
-      ...formData,
-      referenceTable: {
-        ...formData.referenceTable,
-        [column]: selectedColumn
-      }
-    })
-  }
 
   const handleAddEquipment = async () => {
     if (
@@ -94,7 +61,9 @@ const AddEquipmentModal = ({
       !formData.manufacturer ||
       !formData.model ||
       !formData.serialNo ||
-      !formData.category
+      !formData.category || 
+      !formData.type || 
+      (formData.type === 'thermometer' && !formData.accuracyOfMeasurements)
     ) {
       return message.error("Please fill all fields!");
     }
@@ -194,10 +163,13 @@ const AddEquipmentModal = ({
           </div>
           {formData.type === 'thermometer' && (
             <input
-              type="number"
-              name='accurayOfMeasurement' 
+              name='accuracyOfMeasurements'
+              value={formData.accuracyOfMeasurements}
               placeholder='Accuracy of measurement in °C' 
-              onChange={handleInputChange}
+              onChange={(e) => {
+                e.preventDefault();
+                handleInputChange(e);
+              }}
             />
           )}
           <div>
@@ -206,13 +178,7 @@ const AddEquipmentModal = ({
               name="category"
               id="category"
               value={formData.category}
-              onChange={(e) => {
-                if (e.target.value !== 'reference') {
-                  resetParametersTable();
-                  setShowParametersTable(false);
-                }
-                handleInputChange(e)
-              }}
+              onChange={handleInputChange}
             >
               <option value="" disabled selected>
                 Please Select Equipment Category
@@ -221,66 +187,6 @@ const AddEquipmentModal = ({
               <option value="client">Client</option>
             </select>
           </div>
-          {formData.category === "reference" && !showParametersTable ? (
-            <div className="btn-div" style={{ justifyContent: "start" }}>
-              <button
-                id="btn-1"
-                className="btn"
-                type="button"
-                onClick={() => setShowParametersTable(true)}
-              >
-                Parameters
-              </button>
-            </div>
-          ) : (
-            <></>
-          )}
-          {formData.category === "reference" && showParametersTable && (
-            <div>
-              <table border="1">
-                <thead>
-                  <tr>
-                    <th style={{ padding: 6 }}>°C</th>
-                    <th style={{ padding: 6 }}>Correction</th>
-                    <th style={{ padding: 6 }}>U (2K)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {formData.referenceTable.degreeC.map((item, index) => (
-                    <tr key={index}>
-                      <td style={{ padding: 6 }}>
-                        <input
-                          className={"yellow"}
-                          onChange={(e) => {
-                            handleReferenceTableValueUpdate(e.target.value, index, 'degreeC')
-                          }}
-                          defaultValue={item.value}
-                        />
-                      </td>
-                      <td style={{ padding: 6 }}>
-                        <input
-                          className={"yellow"}
-                          onChange={(e) => {
-                            handleReferenceTableValueUpdate(e.target.value, index, 'correction')
-                          }}
-                          defaultValue={formData.referenceTable.correction[index].value}
-                        />
-                      </td>
-                      <td style={{ padding: 6 }}>
-                        <input
-                          className={"yellow"}
-                          onChange={(e) => {
-                            handleReferenceTableValueUpdate(e.target.value, index, 'u2k')
-                          }}
-                          defaultValue={formData.referenceTable.u2k[index].value}
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
           <div className="btn-div">
             <button
               id="btn-1"

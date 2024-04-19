@@ -54,8 +54,8 @@ const DeleteEquipment = async (req, res) => {
 
 const AddEquipment = async (req, res) => {
     try {
-        const { owner, code, description, manufacturer, model, serialNo, category, referenceTable } = req.body;
-        if (!code || !description || !manufacturer || !model || !serialNo || !category) {
+        const { owner, code, description, manufacturer, model, serialNo, category, parametersTable, type } = req.body;
+        if (!code || !description || !manufacturer || !model || !serialNo || !category || !type) {
             return res.status(400).send('Invalid data');
         }
         const operatorId = res.locals.payload.id;
@@ -73,10 +73,14 @@ const AddEquipment = async (req, res) => {
                     model,
                     serialNo,
                     category,
-                    referenceTable
+                    parametersTable,
+                    type
                 };
                 if (owner) {
                     equipmentData.owner = owner;
+                }
+                if (type == 'thermometer' && req.body.accuracyOfMeasurements) {
+                    equipmentData.accuracyOfMeasurements = req.body.accuracyOfMeasurements;
                 }
                 const newEquipment = await Equipment.create(equipmentData);
                 if (newEquipment) {
@@ -96,7 +100,7 @@ const AddEquipment = async (req, res) => {
 
 const UpdateEquipment = async (req, res) => {
     try {
-        const { owner, code, description, manufacturer, model, serialNo, category, nextProposedCalibrationDuration, referenceTable } = req.body;
+        const { owner, code, description, manufacturer, model, serialNo, category, nextProposedCalibrationDuration, parametersTable } = req.body;
         const equipmentId = req.params.equipmentId;
         if (!code || !description || !manufacturer || !model || !serialNo || !category) {
             return res.status(400).send('Invalid data');
@@ -116,7 +120,7 @@ const UpdateEquipment = async (req, res) => {
                     model,
                     serialNo,
                     category,
-                    referenceTable
+                    parametersTable
                 };
                 if (owner) {
                     equipmentData.owner = owner;
@@ -153,7 +157,7 @@ const UpdateEquipmentParameters = async (req, res) => {
 
         if (operator?.role === 'admin' || operator?.role === 'manager') {
             const equipmentData = {
-                referenceTable: parameters
+                parametersTable: parameters
             };
             console.log(equipmentId, equipmentData);
             const updatedEquipment = await Equipment.findByIdAndUpdate(equipmentId, equipmentData);
@@ -204,6 +208,10 @@ const AddCalibrationDetails = async (req, res) => {
             workOrderNo,
             placeOfCalibration,
             nextProposedCalibrationDuration,
+            enviromentalConditions,
+            calibrationTemperature,
+            calibrationTables,
+            bathParameters
         } = req.body;
         if (!certificateNo ||
             !dateOfReceipt ||
@@ -211,7 +219,12 @@ const AddCalibrationDetails = async (req, res) => {
             !dateOfIssue ||
             !workOrderNo ||
             !placeOfCalibration ||
-            !nextProposedCalibrationDuration) {
+            !nextProposedCalibrationDuration ||
+            !enviromentalConditions ||
+            !calibrationTemperature ||
+            !calibrationTables ||
+            !bathParameters
+        ) {
             return res.status(400).send('Invalid data');
         }
         const equipmentId = req.params.equipmentId;
@@ -232,6 +245,13 @@ const AddCalibrationDetails = async (req, res) => {
                     placeOfCalibration,
                     calibratedBy: operatorId,
                     nextProposedCalibrationDuration,
+                    enviromentalConditions,
+                    calibrationTemperature,
+                    calibrationTables,
+                    bathParameters,
+                }
+                if (req.body.comments) {
+                    calibrationDetails.comments = req.body.comments;
                 }
                 existingEquipment.claibrationDetails.push(calibrationDetails);
                 await existingEquipment.save();

@@ -101,7 +101,7 @@ const Calibrations = () => {
 
     return (
         <>
-            {UpdateEquipment &&
+            {(UpdateEquipment && isOpenPopup) &&
                 <CalibrateEquipmentModal isOpen={isOpenPopup} onRequestClose={handleModalClose} equipment={UpdateEquipment} counter={prevCounter} fetchEquipments={fetchEquipments} />
             }
             {report &&

@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux';
 import { HideLoading, ShowLoading } from '../../redux/loaderSlice';
 import { message } from 'antd';
 import Modal from 'react-modal';
-import { FaEdit, FaSlidersH } from "react-icons/fa";
+import { FaEdit } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
 import AddEquipmentModal from '../../components/AddEquipmentModal';
 import EditEquipmentModal from '../../components/EditEquipmentModal';
@@ -13,7 +13,7 @@ import equipmentService from '../../services/equipmentService';
 import SearchBar from '../../components/SearchBar/Searchbar';
 import SortBar from '../../components/SortBar/Sortbar';
 import { sort } from 'fast-sort';
-import { IoAlbums, IoMailUnread } from 'react-icons/io5';
+import { IoApps, IoMailUnread } from 'react-icons/io5';
 import ParametersModal from '../../components/ParametersModal';
 
 // Set the app element for react-modal
@@ -150,7 +150,6 @@ const Equipments = () => {
     }
 
     const handleOpenParametersModal = (parametersTableValue, equipmentId) => {
-        console.log('the equipment id is...', equipmentId);
         setIsParametersModalOpen({
             isOpen: true,
             equipmentId: equipmentId
@@ -209,7 +208,17 @@ const Equipments = () => {
             {editEquipment &&
                 <EditEquipmentModal isOpen={isOpenPopup2} onRequestClose={handleModalClose2} fetchEquipments={fetchEquipments} Equipment={editEquipment} Clients={clients} />
             }
-            {isParametersModalOpen.isOpen && <ParametersModal isOpen={isParametersModalOpen.isOpen} onRequestClose={handleCloseParametersModal} parametersTable={parametersTable} equipmentId={isParametersModalOpen.equipmentId} />}
+            {isParametersModalOpen.isOpen && 
+            <ParametersModal 
+                isOpen={isParametersModalOpen.isOpen} 
+                onRequestClose={handleCloseParametersModal} 
+                parametersTable={parametersTable} 
+                equipmentId={isParametersModalOpen.equipmentId}
+                onUpdateParameters={() => {
+                    fetchEquipments();
+                    handleCloseParametersModal();
+                }}
+            />}
             <div className='Equipments'>
                 <div className='flex'>
                     <h2 className='title'>Equipment List</h2>
@@ -257,10 +266,7 @@ const Equipments = () => {
                                         <MdDelete size={22} className='action-icon' color='#C93616' onClick={() => handleDelete(equipment._id)} />
                                         {
                                             equipment.category === 'reference' && (
-                                                <IoAlbums size={20} className='action-icon' color='gray' onClick={() => {
-                                                    debugger;
-                                                    handleOpenParametersModal(equipment.referenceTable, equipment._id);
-                                                }} />
+                                                <IoApps size={20} className='action-icon' color='gray' onClick={() => handleOpenParametersModal(equipment.parametersTable, equipment._id)} />
                                             )
                                         }
                                         {
