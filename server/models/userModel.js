@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema({
     },
     photoSignature: {
         type: String,
-        default: ''
+        default: null
     }
 },
     { timestamps: true }

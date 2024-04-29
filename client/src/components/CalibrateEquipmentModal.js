@@ -18,6 +18,31 @@ const CalibarationTables = ({
 
     return (
       <>
+        <div
+          style={{
+            padding: 13,
+            display: "flex",
+            width: "100%",
+            justifyContent: "center",
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+        >
+        <b>Calibration Temperature °C:</b>
+        <input
+          style={{ flex: 1, margin: "0 20px 0 20px" }}
+          value={table.calibrationTemperature ?? ''}
+          id="calibrationTemperature"
+          name="calibrationTables.calibrationTemperature"
+          onChange={e => handleInputChange(e, [
+            "calibrationTables",
+            tableIndex,
+            'calibrationTemperature'
+          ])}
+        />
+        <div>°C</div>
+        </div>
+        <hr />
         <table>
           <thead>
             <tr>
@@ -81,7 +106,7 @@ const CalibarationTables = ({
 };
 
 const FirstStep = ({
-  formData, handleInputChange, setCurrentScreen
+  formData, handleInputChange, setCurrentScreen, referenceEquipments
 }) => {
   return (
     <>
@@ -130,13 +155,37 @@ const FirstStep = ({
           </div>
           <div>
             <label htmlFor="placeOfCalibration">Place of Calibration: </label>
-            <input
+            {/* <input
               type="text"
               id="placeOfCalibration"
               name="placeOfCalibration"
               value={formData.placeOfCalibration}
               onChange={handleInputChange}
-            />
+            /> */}
+            <select
+              name="placeOfCalibration"
+              id="placeOfCalibration"
+              value={formData.placeOfCalibration}
+              onChange={handleInputChange}
+            >
+              <option value="" disabled selected>Please select a place of calibration</option>
+              <option value="Client Premises">Client premises</option>
+              <option value="Laboratory">Laboratory</option>
+            </select>
+          </div>
+          <div>
+            Reference Equipment
+            <select 
+              name="referenceEquipment" 
+              id="referenceEquipment"
+              value={formData.referenceEquipment}
+              onChange={handleInputChange}
+            >
+              <option value="" selected disabled>Please select a reference equipment</option>
+              {referenceEquipments.map((item) => (
+                <option value={item._id}>{item.code}</option>
+              ))}
+            </select>
           </div>
           {/* <div>
                   <label htmlFor='calibratedBy'>Calibrated By: </label>
@@ -433,27 +482,6 @@ const ThirdStep = ({
 }) => {
   return (
     <>
-      <div
-        style={{
-          padding: 13,
-          display: "flex",
-          width: "100%",
-          justifyContent: "center",
-          flexDirection: "row",
-          alignItems: "center",
-        }}
-      >
-        <b>Calibration Temperature °C:</b>
-        <input
-          style={{ flex: 1, margin: "0 20px 0 20px" }}
-          value={formData.calibrationTemperature ?? ''}
-          id="calibrationTemperature"
-          name="calibrationTemperature"
-          onChange={handleInputChange}
-        />
-        <div>°C</div>
-      </div>
-      <hr />
       <CalibarationTables formData={formData} handleInputChange={handleInputChange} />
       <div className="btn-div">
         <button
@@ -465,6 +493,7 @@ const ThirdStep = ({
             setFormData((prevData) => ({
               ...prevData,
               calibrationTables: [...prevData.calibrationTables, {
+                calibrationTemperature: null,
                 referenceTemperatureInitial: new Array(10).fill(null),
                 calibratedTemperature: new Array(10).fill(null),
                 referenceTemperatureFinal: new Array(10).fill(null),
@@ -508,6 +537,7 @@ const CalibrateEquipmentModal = ({
   equipment,
   counter,
   fetchEquipments,
+  referenceEquipments
 }) => {
   const [formData, setFormData] = useState({
     dateOfReceipt: "",
@@ -515,6 +545,7 @@ const CalibrateEquipmentModal = ({
     dateOfIssue: "",
     workOrderNo: "",
     placeOfCalibration: "",
+    referenceEquipment: "",
     // calibratedBy: '',
     nextProposedCalibrationDuration: "",
     enviromentalConditions: {
@@ -526,9 +557,9 @@ const CalibrateEquipmentModal = ({
       bathStability: [null, null],
       bathHomogeneousness: [null, null],
     },
-    calibrationTemperature: null,
     calibrationTables: [
       {
+        calibrationTemperature: null,
         referenceTemperatureInitial: new Array(10).fill(null),
         calibratedTemperature: new Array(10).fill(null),
         referenceTemperatureFinal: new Array(10).fill(null),
@@ -555,9 +586,9 @@ const CalibrateEquipmentModal = ({
         bathStability: [null, null],
         bathHomogeneousness: [null, null],
       },
-      calibrationTemperature: null,
       calibrationTables: [
         {
+          calibrationTemperature: null,
           referenceTemperatureInitial: new Array(10).fill(null),
           calibratedTemperature: new Array(10).fill(null),
           referenceTemperatureFinal: new Array(10).fill(null),
@@ -569,19 +600,19 @@ const CalibrateEquipmentModal = ({
 
   const handleInputChange = (e, path) => {
     const { name, value } = e.target;
+    console.log({ name, value })
+
     const forceNumeric = [
       'enviromentalConditions.temperature',
       'enviromentalConditions.relativeHumidity',
       'enviromentalConditions.atmosphericPressure',
       'bathParameters.bathStability',
       'bathParameters.bathHomogeneousness',
-      'calibrationTemperature',
+      'calibrationTables.calibrationTemperature',
       'calibrationTables.referenceTemperatureInitial',
       'calibrationTables.calibratedTemperature',
       'calibrationTables.referenceTemperatureFinal'
     ]
-
-    console.log({ name, value });
 
     if (forceNumeric.includes(name)) {
       if (!NUMBER_REGEX.test(value)) {
@@ -611,23 +642,42 @@ const CalibrateEquipmentModal = ({
     }));
   };
 
+  function containsNullOrEmpty(tables) {
+    if (
+      JSON.stringify(tables).includes('null') || 
+      JSON.stringify(tables).includes('""') || 
+      JSON.stringify(tables).includes("''") || 
+      JSON.stringify(tables).includes('" "') || 
+      JSON.stringify(tables).includes("' '")
+    )
+    return true;
+    return false;
+  }
+
   const handleCalibrateEquipment = async () => {
+    debugger;
     if (
       !formData.dateOfReceipt ||
       !formData.dateOfCalibration ||
       !formData.dateOfIssue ||
       !formData.workOrderNo ||
       !formData.placeOfCalibration ||
+      !formData.referenceEquipment ||
       !formData.nextProposedCalibrationDuration ||
       !formData.enviromentalConditions ||
-      !formData.enviromentalConditions.temperature ||
-      !formData.enviromentalConditions.relativeHumidity ||
-      !formData.enviromentalConditions.atmosphericPressure ||
+      !formData.enviromentalConditions.temperature[0] ||
+      !formData.enviromentalConditions.temperature[1] ||
+      !formData.enviromentalConditions.relativeHumidity[0] ||
+      !formData.enviromentalConditions.relativeHumidity[1] ||
+      !formData.enviromentalConditions.atmosphericPressure[0] ||
+      !formData.enviromentalConditions.atmosphericPressure[1] ||
       !formData.bathParameters ||
-      !formData.bathParameters.bathStability ||
-      !formData.bathParameters.bathHomogeneousness ||
-      !formData.calibrationTemperature ||
-      (!formData.calibrationTables && !formData.calibrationTables[0])
+      !formData.bathParameters.bathStability[0] ||
+      !formData.bathParameters.bathStability[1] ||
+      !formData.bathParameters.bathHomogeneousness[0] ||
+      !formData.bathParameters.bathHomogeneousness[1] ||
+      (!formData.calibrationTables && !formData.calibrationTables[0] && !formData.calibrationTables[0].calibrationTemperature) ||
+      containsNullOrEmpty(formData.calibrationTables)
     ) {
       return message.error("Please fill all fields!");
     }
@@ -664,6 +714,7 @@ const CalibrateEquipmentModal = ({
         formData={formData}
         handleInputChange={handleInputChange}
         setCurrentScreen={setCurrentScreen}
+        referenceEquipments={referenceEquipments}
       />;
       break;
     case 2:
@@ -692,7 +743,6 @@ const CalibrateEquipmentModal = ({
     const ModalItem = modalRef?.current?.node?.childNodes[0]?.childNodes[0];
     if (ModalItem) {
       ModalItem.scrollTo(0,0);
-      ModalItem.childNodes[0].style.position = 'static'
     }
   }, [currentScreen]);
 

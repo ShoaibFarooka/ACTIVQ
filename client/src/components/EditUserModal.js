@@ -6,6 +6,7 @@ import { message } from 'antd';
 import userService from '../services/userService';
 
 const EditUserModal = ({ isOpen, onRequestClose, fetchUsers, User, operatorRole }) => {
+    console.log("user", User);
     const [formData, setFormData] = useState({
         name: User.name,
         username: User.username,
@@ -47,7 +48,7 @@ const EditUserModal = ({ isOpen, onRequestClose, fetchUsers, User, operatorRole 
         if (formData.password) {
             data.password = formData.password;
         }
-        if (formData.role === 'manager' && formData.photoSignature != null) {
+        if ((formData.role === 'manager' || (formData.role === 'employee' && formData.permissions['Photo signature'] === true)) && formData.photoSignature != null) {
             data.photoSignature = formData.photoSignature;
         }
         try {
@@ -143,7 +144,7 @@ const EditUserModal = ({ isOpen, onRequestClose, fetchUsers, User, operatorRole 
                             </div>
                         </div>
                     }
-                    {formData.role === 'manager' &&
+                    {(formData.role === 'manager' || (formData.role === 'employee' && formData.permissions['Photo signature'] === true)) &&
                         <div>
                             {formData.photoSignature != null && 
                                 <img width={160} src={formData.photoSignature instanceof File ?

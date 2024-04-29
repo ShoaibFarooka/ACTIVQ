@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 // Define sub-schema for calibration table
 const CalibrationTableSchema = new mongoose.Schema({
+    calibrationTemperature: { type: Number },
     referenceTemperatureInitial: {
         type: [Number],
         default: Array(10).fill(null), // To initialize with null values
@@ -75,6 +76,11 @@ const equipmentSchema = new mongoose.Schema({
     },
     claibrationDetails: [
         {
+            createdAt: {
+                type: Number,
+                default: Date.now,
+                required: true
+            },
             certificateNo: {
                 type: String,
                 required: true
@@ -98,6 +104,11 @@ const equipmentSchema = new mongoose.Schema({
             placeOfCalibration: {
                 type: String,
                 required: true
+            },
+            referenceEquipment: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Equipment',
+                required: true,
             },
             calibratedBy: {
                 type: mongoose.Schema.Types.ObjectId,
@@ -132,9 +143,16 @@ const equipmentSchema = new mongoose.Schema({
                     { type: Number, required: true }
                 ],
             },
-            calibrationTemperature: { type: Number },
             calibrationTables: [CalibrationTableSchema],
-            comments: { type: String }
+            comments: { type: String },
+            reportVerification: { 
+                status: { type: Boolean },
+                approvedBy: { 
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: 'User',
+                    default: null
+                }
+            }
         }
     ],
 },

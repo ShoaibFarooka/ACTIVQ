@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    .container {
+        margin: 48px;
+        font-family: sans-serif;
+    }
+    .header-text {
+        margin-top: 24px;
+        font-size: 28px;
+        color: rgb(0, 0, 92);
+        display: flex;
+        justify-content: space-between;
+    }
+    .header-text > span {
+
+    }
+    .header-text > img {
+        margin-bottom: 16px;
+    }
+    .hr {
+        padding: 0.5px;
+        background-color: black;
+        margin: 0;
+    }
+    .certificate {
+        font-size: 12px;
+        margin-left: 15%;
+    }
+    .certificate-number {
+        color: rgb(0, 0, 161);
+    }
+    .company {
+        margin: 8px;
+        display: flex;
+    }
+    .company-logo-placeholder {
+        width: 80px;
+        min-width: 80px;
+        max-width: 80px;
+        height: 80px;
+        max-height: 80px;
+        min-height: 80px;
+        border: 1px red solid;
+        content: 'LOGO';
+    }
+    .company-logo {
+        width: 80px;
+        min-width: 80px;
+        max-width: 80px;
+        height: 80px;
+        max-height: 80px;
+        min-height: 80px;
+    }
+    .company-info {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        margin-left: 12px;
+    }
+    .company-name {
+        font-weight: bold;
+        font-size: 24px;
+    }
+    .company-contact {
+        font-size: 12px;
+    }
+
+    .grid-container {
+        display: grid;
+        grid-template-columns: 25% 75%;
+        font-size: 12px;
+    }
+    
+    .grid-container > * {
+        margin-bottom: 12px;
+    }
+
+    .footer-text {
+        color: rgb(0, 0, 161);
+        font-size: 12px;
+    }
+    .sub-head-text {
+        font-size: 12px;
+        margin-right: 15%;
+    }
+
+    .question-text {
+        font-size: 12px;
+    }
+
+    .table-text {
+        color: rgb(0, 0, 161);
+        font-style: italic;
+        font-size: 10px;
+    }
+
+    .table-heading {
+        color: rgb(0, 0, 161);
+        font-style: italic;
+        font-weight: bold;
+        font-size: 12px;
+    }
+
+    .table-mid {
+        text-align: center;
+        font-size: 12px;
+    }
+    
+    .flex { 
+        display: flex;
+    }
+
+    .outline-table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 10px;
+    }
+
+    .outline-table td {
+        border: 1.5px gray solid;
+        padding: 4px;
+        border-spacing: 0;
+        text-align: center;
+        font-size: 10px;
+    }
+
+    .outline-table thead td {
+        font-weight: bold;
+        color: rgb(0, 0, 161);
+        font-style: italic;
+        font-size: 10px;
+    }
+
+    .outline-compressed-table {
+        border-collapse: collapse;
+        border-spacing: 0;
+        width: 100%;
+        font-size: 10px;
+    }
+
+    .outline-compressed-table thead td {
+        color: rgb(0, 0, 161);
+        font-style: italic;
+        font-size: 10px;
+    }
+
+    .outline-compressed-table td {
+        border: 1.5px gray solid;
+        text-align: center;
+        font-size: 10px;
+    }
+
+    .notes-table {
+        border-collapse: collapse;
+        border-spacing: 0;
+        width: 100%;
+        max-width: 100%;
+        font-size: 10px;
+        table-layout: fixed;
+    }
+
+    .notes-table :first-child {
+        text-align: center;
+        font-size: 10px;
+        width: 5%;
+    }
+
+    .notes-table td {
+        border: 1.5px gray solid;
+        text-align: left;
+        font-size: 10px;
+    }
+
+    .header-color {
+        color: rgb(0, 0, 92);
+    }
+
+    .f-12 {
+        font-size: 12px;
+    }
+
+    .f-10 {
+        font-size: 10px;
+    }
+
+    .f-18 {
+        font-size: 18px;
+    }
+
+</style>
+<body>
+    <div class="container">
+        <br>
+        <hr class="hr">
+        <div class="header-text">
+            <span class="f-18"><b><i>CERTIFICATE OF CALIBRATION</i></b></span>
+            <img width="30%" src="http://localhost:5005/uploads/banner.png" alt="authorities">
+        </div>
+        <hr class="hr">
+        <center class="certificate">
+            <span class="certificate-number"><i>Certificate number</i></span> {{ certificateNumber }}
+        </center>
+        <hr class="hr">
+        <center class="certificate">
+            &hairsp;
+        </center>
+        <hr class="hr">
+        <br>
+        <div class="company">
+            <img class="company-logo" src="{{ companyLogo }}" alt="Company Logo">
+            <div class="company-info">
+                <div class="company-name">
+                    {{ companyName }}
+                </div>
+                <div class="company-contact">
+                    {{ contactInfo }}
+                </div>
+            </div>
+        </div>
+        <br>
+        <hr class="hr">
+        <br>
+        <div class="cert-body">
+            <div class="grid-container">
+                <div>Customer</div>
+                <div>: {{ customer }}</div>
+                <div>Address</div>
+                <div>: {{ address }}</div>
+                <div>Item Code</div>
+                <div>: {{ itemCode }}</div>
+                <div>Description</div>
+                <div>: {{ description }}</div>
+                <div>Manufacturer</div>
+                <div>: {{ manufacturer }}</div>
+                <div>Type</div>
+                <div>: {{ type }}</div>
+                <div>Instrument serial No</div>
+                <div>: {{ serialNo }}</div>
+                <div>Date of Receipt</div>
+                <div>: {{ dateOfReceipt }}</div>
+                <div>Date of Calibration</div>
+                <div>: {{ dateOfCalibration }}</div>
+                <div>Date of Issue</div>
+                <div>: {{ dateOfIssue }}</div>
+                <div>Calibration Procedure</div>
+                <div>: Brief Description On Page 2</div>
+                <div>Place of Calibration</div>
+                <div>: {{ placeOfCalibration }}</div>
+                <div>Calibrated By</div>
+                <div>: {{ calibratedBy }}</div>
+            </div>
+        </div>
+        <br>
+        <center class="f-10">
+                {{#if authorizedSignatory}}
+                    <img class="company-logo" src="{{ authorizedSignatory }}" alt="Authorized Signatory">
+                {{else}}
+                    <img class="company-logo-placeholder">
+                {{/if}}
+            <div>Authorized Signatory</div>
+        </center>
+        <br>
+        <br>
+        <br>
+        <br>
+        <hr class="hr">
+        <br>
+        <span class="footer-text">
+            <i>This certificate may not be reproduced other than in full or without prior written approval of {{ companyName }} Certificates without signature are not valid. A copy of this certificate will be kept at the issuing laboratory for a period of at least five years. The results concern only the calibration item.</i>
+        </span>
+        <br>
+        <br>
+        <hr class="hr">
+        <br>
+        <br>
+        <div align="right" class="certificate-number"> Page 1 of 2</div>
+        <br>
+        <hr class="hr">
+        <br>
+        <br>
+        <!-- PAGE 2 BEGINS HERE! -->
+        <div class="flex" style="align-items: flex-start; margin: 24px;"> 
+            <img class="company-logo" src="{{ companyLogo }}" alt="Company Logo">
+            <div class="header-color f-18" style="margin-left: 12px;">
+                <b><i>
+                    CERTIFICATE OF CALIBRATION
+                </i></b>
+            </div>
+            <img src="http://localhost:5005/uploads/banner.png" alt="Banner" width="25%" style="margin-left: auto;">
+        </div>
+        <hr class="hr">
+        <center class="certificate">
+            <span class="certificate-number"><i>Certificate number</i></span> {{ certificateNumber }}
+        </center>
+        <hr class="hr">
+        <br>
+        <center class="sub-head-text certificate-number">
+            <b><i>
+                CALIBRATION OF APPARATUS
+            </i></b>
+        </center>
+        <div class="question-text">
+            <b><i>
+                1. Condition of apparatus to be calibrated
+            </i></b>
+        </div>
+        <div class="question-text">
+            <i>
+                The apparatus under calibration was found in good condition.
+            </i>
+        </div>
+        <div class="question-text">
+            <b><i>
+                2. Technical specifications of apparatus under calibration
+            </i></b>
+        </div>
+        <table style="width: 65%">
+            <thead>
+                <tr>
+                    <td>
+                        <div></div>
+                    </td>
+                    <td class="table-mid table-heading">
+                        <div>Channel T1: Sensor 1</div>
+                    </td>
+                    <td class="table-mid table-heading">
+                        <div>Channel T2: Sensor 2</div>
+                    </td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <div></div>
+                    </td>
+                    <td>
+                        <hr class="hr">
+                    </td>
+                    <td>
+                        <hr class="hr">
+                    </td>
+                </tr>
+                <tr>
+                    <td class="table-text">
+                        Working Range
+                    </td>
+                    <td class="table-mid">
+                        -10 °C … 200 °C
+                    </td>
+                    <td class="table-mid">
+                        -200 °C … 1370 °C
+                    </td>
+                </tr>
+                <tr>
+                    <td class="table-text">
+                        Calibration Range
+                    </td>
+                    <td class="table-mid">
+                        {{calibrationRange.[0]}} °C … {{calibrationRange.[1]}} °C
+                    </td>
+                    <td class="table-mid" class="table-text table-mid">
+                        -20 °C … 80 °C
+                    </td>
+                </tr>
+                <tr>
+                    <td class="table-text">
+                        Resolution
+                    </td>
+                    <td class="table-mid">
+                        0.1 °C
+                    </td>
+                    <td class="table-mid">
+                        0.1 °C
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="question-text">
+            <b><i>
+                3. Environmental conditions during calibration
+            </i></b>
+        </div>
+        <div class="f-10">
+            <div class="flex">
+                <span>Temperature</span>
+                <span>:</span>
+                <span class="flex">
+                    <span>{{ temperature.average }}</span>
+                    &nbsp;
+                    <div>°C</div>
+                </span>
+                <span>±</span>
+                <span>{{ temperature.tolerance }}</span>
+                <span>°C</span>
+            </div>
+            <div class="flex">
+                <span>Relative Humidity</span>
+                <span>:</span>
+                <span class="flex">
+                    <span>{{ relativeHumidity.average }}</span>
+                    &nbsp;
+                    <div>%RH</div>
+                </span>
+                <span>±</span>
+                <span>{{ relativeHumidity.tolerance }}</span>
+                <span>%RH</span>
+            </div>
+            <div class="flex">
+                <span>Air Pressure</span>
+                <span>:</span>
+                <span class="flex">
+                    <span>{{ airPressure.average }}</span>
+                    &nbsp;
+                    <div>hPa</div>
+                </span>
+                <span>±</span>
+                <span>{{ airPressure.tolerance }}</span>
+                <span>hPa</span>
+            </div>
+        </div>
+        <div class="question-text">
+            <b><i>
+                4. Calibration procedure
+            </i></b>
+        </div>
+        <div class="question-text">
+            <i>The calibration of apparatus was carried out by comparison using standard reference equipment into a standard mean of comparison, as indicated below.</i>
+        </div>
+        <div class="question-text">
+            <b><i>5. Apparatus - Traceability</i></b>
+        </div>
+
+        <table class="outline-table">
+            <thead>
+                <tr>
+                    <td>Lab. ref. code</td>
+                    <td>Description</td>
+                    <td>Manufacturer</td>
+                    <td>Model</td>
+                    <td>Serial No</td>
+                    <td>Cal. Cert. No</td>
+                    <td>Traceability</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ refEquipment.code }}</td>
+                    <td>{{ refEquipment.description }}</td>
+                    <td>{{ refEquipment.manufacturer }}</td>
+                    <td>{{ refEquipment.model }}</td>
+                    <td>{{ refEquipment.serialNo }}</td>
+                    <td>{{ certificateNumber }}</td>
+                    <td>ilac-MRA</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="question-text">
+            <b><i>
+                6. Uncertainty
+            </i></b>
+        </div>
+        <div class="question-text">
+            <i>The report expanded uncertainty is based on a confidence level of 95%. It has been evaluated in accordance to EA-4/02 "Guide to the expression of uncertainty in measurement". It includes the reference apparatus uncertainty and the apparatus under calibration uncertainty</i>
+        </div>
+        <center class="certificate-number f-12">
+            <b><i>
+                CALIBRATION RESULTS
+            </i></b>
+        </center>
+        <center class="certificate-number f-12">
+            <b><i>
+                Channel T1: Sensor 1
+            </i></b>
+        </center>
+        <table class="outline-compressed-table">
+            <thead>
+                <tr>
+                    <td>Reference temperature</td>
+                    <td>Reading of the instrument under calibration</td>
+                    <td>Correction of indication</td>
+                    <td>Uncertainty of measurement</td>
+                    <td>Mean of comparison</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>(°C)</td>
+                    <td>(°C)</td>
+                    <td>(°C)</td>
+                    <td>(±)(°C)</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>-79.63</td>
+                    <td>-79.63</td>
+                    <td>-79.63</td>
+                    <td>-79.63</td>
+                    <td>Ice Bath</td>
+                </tr>
+                <tr>
+                    <td>-79.63</td>
+                    <td>-79.63</td>
+                    <td>-79.63</td>
+                    <td>-79.63</td>
+                    <td>Ice Bath</td>
+                </tr>
+                <tr>
+                    <td>-79.63</td>
+                    <td>-79.63</td>
+                    <td>-79.63</td>
+                    <td>-79.63</td>
+                    <td>Oil Bath</td>
+                </tr>
+                <tr>
+                    <td>-79.63</td>
+                    <td>-79.63</td>
+                    <td>-79.63</td>
+                    <td>-79.63</td>
+                    <td>Oil Bath</td>
+                </tr>
+                <tr>
+                    <td>-79.63</td>
+                    <td>-79.63</td>
+                    <td>-79.63</td>
+                    <td>-79.63</td>
+                    <td>Oil Bath</td>
+                </tr>
+                <tr>
+                    <td>-79.63</td>
+                    <td>-79.63</td>
+                    <td>-79.63</td>
+                    <td>-79.63</td>
+                    <td>Oil Bath</td>
+                </tr>
+            </tbody>
+        </table>
+        <center class="certificate-number f-12">
+            <b><i>
+                Channel T2: Sensor 2
+            </i></b>
+        </center>
+        <table class="outline-compressed-table">
+            <thead>
+                <tr>
+                    <td>Reference temperature</td>
+                    <td>Reading of the instrument under calibration</td>
+                    <td>Correction of indication</td>
+                    <td>Uncertainty of measurement</td>
+                    <td>Mean of comparison</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>(°C)</td>
+                    <td>(°C)</td>
+                    <td>(°C)</td>
+                    <td>(±)(°C)</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>-79.63</td>
+                    <td>-79.63</td>
+                    <td>-79.63</td>
+                    <td>-79.63</td>
+                    <td>Ice Bath</td>
+                </tr>
+                <tr>
+                    <td>-79.63</td>
+                    <td>-79.63</td>
+                    <td>-79.63</td>
+                    <td>-79.63</td>
+                    <td>Ice Bath</td>
+                </tr>
+                <tr>
+                    <td>-79.63</td>
+                    <td>-79.63</td>
+                    <td>-79.63</td>
+                    <td>-79.63</td>
+                    <td>Oil Bath</td>
+                </tr>
+                <tr>
+                    <td>-79.63</td>
+                    <td>-79.63</td>
+                    <td>-79.63</td>
+                    <td>-79.63</td>
+                    <td>Oil Bath</td>
+                </tr>
+                <tr>
+                    <td>-79.63</td>
+                    <td>-79.63</td>
+                    <td>-79.63</td>
+                    <td>-79.63</td>
+                    <td>Oil Bath</td>
+                </tr>
+                <tr>
+                    <td>-79.63</td>
+                    <td>-79.63</td>
+                    <td>-79.63</td>
+                    <td>-79.63</td>
+                    <td>Oil Bath</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="question-text">
+            <b><i>
+                7. Notes
+            </i></b>
+        </div>
+        <table class="notes-table">
+            <tbody>
+                <tr>
+                    <td>1.</td>
+                    <td>A label is suplied with the calibrated object showing the calibration date and certificate number</td>
+                </tr>
+                <tr>
+                    <td>2.</td>
+                    <td>The results apply to the state of the calibrated instrument and to the conditions at the time of calibration. Long term effects on the item to be calibrated are not included</td>
+                </tr>
+                {{#if comments}}
+                    <tr>
+                        <td>3.</td>
+                        <td style="
+                            max-height: 200px;
+                            height: 200px;
+                            word-wrap: break-word;
+                            text-overflow: ellipsis;
+                            overflow: hidden;
+                        ">{{ comments }}</td>
+                    </tr>
+                {{/if}}
+            </tbody>
+        </table>
+        <br>
+        <div class="header-color">
+            <span><b><i>END OF CALIBRATION</i></b></span>
+        </div>
+        <hr class="hr">
+        <br>
+        <div align="right" class="certificate-number">Page 2 of 2</div>
+    </div>
+</body>
+</html>

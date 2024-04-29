@@ -53,4 +53,18 @@ router.post(
     controller.RemindOwnerViaMail
 );
 
+router.post(
+    "/verify-equipment-report",
+    authMiddleware.stripToken,
+    authMiddleware.verifyToken,
+    controller.VerifyEquipmentReport
+);
+
+router.post(
+    "/generate-report-certificate",
+    authMiddleware.stripToken,
+    authMiddleware.verifyToken,
+    controller.GenerateReportCertificate
+);
+
 module.exports = router;

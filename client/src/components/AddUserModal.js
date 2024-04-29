@@ -62,7 +62,9 @@ const AddUserModal = ({ isOpen, onRequestClose, fetchUsers }) => {
             password: formData.password,
             role: formData.role,
             permissions: permissionsArray,
-            photoSignature: formData.photoSignature
+        }
+        if ((formData.role === 'manager' || (formData.role === 'employee' && formData.permissions['Photo signature'] === true)) && formData.photoSignature != null) {
+            data.photoSignature = formData.photoSignature;
         }
         try {
             const response = await userService.addUser(data);
@@ -157,7 +159,7 @@ const AddUserModal = ({ isOpen, onRequestClose, fetchUsers }) => {
                             </div>
                         </div>
                     }
-                    {formData.role === 'manager' &&
+                    {(formData.role === 'manager' || (formData.role === 'employee' && formData.permissions['Photo signature'] === true)) &&
                         <div>
                             {formData.photoSignature != null && 
                                 <img width={160} src={formData.photoSignature instanceof File ?

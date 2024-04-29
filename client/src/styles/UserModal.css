@@ -149,3 +149,28 @@
     background-color: rgb(190, 32, 0);
     color: white;
 }
+
+.verification-button {
+    padding: 6px 10px 6px 10px;
+    background-color: rgb(12, 77, 240);
+    color: white;
+    border: 0;
+    border-radius: 4px;
+    &:hover {
+        background-color: rgb(9, 52, 161);
+    }
+}
+
+.pdf-download-button {
+    padding: 6px 10px 6px 10px;
+    background-color: rgb(27, 134, 0);
+    color: white;
+    border: 0;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    &:hover {
+        background-color: rgb(14, 72, 0);
+    }
+}
