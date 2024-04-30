@@ -3,7 +3,6 @@ const Info = require("../models/infoModel");
 const Equipment = require("../models/equipmentModel");
 const nodemailer = require("nodemailer"); 
 const { generateCertificate, convertImageToBase64 } = require('../certificate-template/generate-certificate');
-const { trackingAuthoritiesLogo } = require("../certificate-template/tracking-authorities-logo");
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -378,10 +377,10 @@ const GenerateReportCertificate = async (req, res) => {
             
             let companyLogoImage = null;
             let authorizedSignatoryImage = null;
-            if (companyInfo.logo) {
+            if (companyInfo?.logo != null && companyInfo?.logo?.trim() != "") {
                 companyLogoImage = convertImageToBase64(companyInfo.logo);
             }
-            if (claibrationDetails?.reportVerification?.approvedBy?.photoSignature) {
+            if (claibrationDetails?.reportVerification?.approvedBy?.photoSignature != null && claibrationDetails?.reportVerification?.approvedBy?.photoSignature?.trim() != "") {
                 authorizedSignatoryImage = convertImageToBase64(claibrationDetails.reportVerification.approvedBy.photoSignature);
             }
 

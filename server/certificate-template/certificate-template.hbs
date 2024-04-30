@@ -213,7 +213,11 @@
         <hr class="hr">
         <br>
         <div class="company">
-            <img class="company-logo" src="{{ companyLogo }}" alt="Company Logo">
+            {{#if companyLogo }}
+                <img class="company-logo" src="{{ companyLogo }}">
+            {{else}}
+                <img class="company-logo-placeholder">
+            {{/if}}
             <div class="company-info">
                 <div class="company-name">
                     {{ companyName }}
@@ -259,7 +263,7 @@
         <br>
         <center class="f-10">
                 {{#if authorizedSignatory}}
-                    <img class="company-logo" src="{{ authorizedSignatory }}" alt="Authorized Signatory">
+                    <img class="company-logo" src="{{ authorizedSignatory }}">
                 {{else}}
                     <img class="company-logo-placeholder">
                 {{/if}}
@@ -286,7 +290,11 @@
         <br>
         <!-- PAGE 2 BEGINS HERE! -->
         <div class="flex" style="align-items: flex-start; margin: 24px;"> 
-            <img class="company-logo" src="{{ companyLogo }}" alt="Company Logo">
+            {{#if companyLogo }}
+                <img class="company-logo" src="{{ companyLogo }}">
+            {{else}}
+                <img class="company-logo-placeholder">
+            {{/if}}
             <div class="header-color f-18" style="margin-left: 12px;">
                 <b><i>
                     CERTIFICATE OF CALIBRATION
@@ -626,8 +634,6 @@
                     <tr>
                         <td>3.</td>
                         <td style="
-                            max-height: 200px;
-                            height: 200px;
                             word-wrap: break-word;
                             text-overflow: ellipsis;
                             overflow: hidden;
