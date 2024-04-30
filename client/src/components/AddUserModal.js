@@ -42,10 +42,14 @@ const AddUserModal = ({ isOpen, onRequestClose, fetchUsers }) => {
 
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
-        setFormData((prevData) => ({
-            ...prevData,
-            [name]: type === 'checkbox' ? { ...prevData[name], [value]: checked } : value,
-        }));
+        const updatedData = {
+            ...formData,
+            [name]: type === 'checkbox' ? { ...formData[name], [value]: checked } : value
+        };
+        if (name === 'permissions' && type === "checkbox" && value === "Photo signature") {
+            updatedData.photoSignature = null;
+        }
+        setFormData(updatedData);
     };
 
     const handleAddUser = async () => {
@@ -170,9 +174,7 @@ const AddUserModal = ({ isOpen, onRequestClose, fetchUsers }) => {
                             }
                             <br />
                             Add Photo Signature:
-                            <input type="file" multiple={false} onChange={(ev) => {
-                                setFormData({...formData, photoSignature: ev.target.files[0] })
-                            }} />
+                            <input type="file" multiple={false} onChange={(ev) => setFormData({...formData, photoSignature: ev.target.files[0] ?? null })} />
                         </div>
                     }
                     <div className="btn-div">

@@ -6,7 +6,6 @@ import { message } from 'antd';
 import userService from '../services/userService';
 
 const EditUserModal = ({ isOpen, onRequestClose, fetchUsers, User, operatorRole }) => {
-    console.log("user", User);
     const [formData, setFormData] = useState({
         name: User.name,
         username: User.username,
