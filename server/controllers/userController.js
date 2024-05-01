@@ -1,6 +1,7 @@
 const User = require("../models/userModel");
 const authMiddleware = require("../middleware/authMiddleware");
 const { updateLogForId } = require("./logController");
+const { isValidURL } = require("../utils/utility");
 
 const Register = async (req, res) => {
     try {
@@ -255,10 +256,15 @@ const UpdateUser = async (req, res) => {
                 const baseUrl = `${req.protocol}://${req.get('host')}`;
                 let photoSignatureUrl = "";
                 
-                if (req.files?.photoSignature || req.photoSignature) {
-                    photoSignatureUrl = req.files?.photoSignature ? baseUrl + '/uploads/' + req.files?.photoSignature?.[0]?.filename : req?.photoSignature;
-                    userData.photoSignature = photoSignatureUrl;
+                if (!isValidURL(req.body.photoSignature)) {
+                    if (req.files?.photoSignature || req.photoSignature) {
+                        photoSignatureUrl = req.files?.photoSignature ? baseUrl + '/uploads/' + req.files?.photoSignature?.[0]?.filename : req?.photoSignature;
+                        userData.photoSignature = photoSignatureUrl;
+                    }
+                } else {
+                    userData.photoSignature = req.body.photoSignature;
                 }
+
                 const updatedUser = await User.findByIdAndUpdate(userId, userData);
                 if (updatedUser) {
                     return res.status(200).send('User updated successfully');

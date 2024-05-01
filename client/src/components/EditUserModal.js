@@ -24,14 +24,23 @@ const EditUserModal = ({ isOpen, onRequestClose, fetchUsers, User, operatorRole 
 
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
-        setFormData((prevData) => ({
-            ...prevData,
-            [name]: type === 'checkbox' ? { ...prevData[name], [value]: checked } : value,
-        }));
+        const updatedData = {
+            ...formData,
+            [name]: type === 'checkbox' ? { ...formData[name], [value]: checked } : value
+        };
+        if (name === 'permissions' && type === "checkbox" && value === "Photo signature") {
+            updatedData.photoSignature = User.photoSignature;
+        }
+        setFormData(updatedData);
     };
 
     const handleUpdateUser = async () => {
-        if (!formData.name || !formData.username || !formData.code) {
+        if (!formData.name ||
+            !formData.username || 
+            !formData.code || 
+            (formData.permissions['Photo signature'] === true && formData.role === 'employee' && formData.photoSignature == null) ||
+            (formData.role === 'manager' && formData.photoSignature == null)
+        ) {
             return message.error('Please fill all fields!');
         }
         const permissionsArray = Object.keys(formData.permissions).filter(
@@ -155,7 +164,7 @@ const EditUserModal = ({ isOpen, onRequestClose, fetchUsers, User, operatorRole 
                             <br />
                             Add Photo Signature:
                             <input type="file" multiple={false} onChange={(ev) => {
-                                setFormData({...formData, photoSignature: ev.target.files[0] })
+                                setFormData({...formData, photoSignature: ev.target.files[0] ?? User.photoSignature })
                             }} />
                         </div>
                     }

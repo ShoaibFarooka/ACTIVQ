@@ -26,7 +26,6 @@ function convertImageToBase64(imagePath) {
 
 async function generateCertificate(props) {
   try {
-    const startTime = performance.now();
     // Launch a headless browser
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
@@ -42,9 +41,6 @@ async function generateCertificate(props) {
   
     // Close the browser
     await browser.close();
-  
-    const endTime = performance.now();
-    console.log((endTime - startTime) / 1000)
   
     return pdfBuffer;
   } catch (error) {

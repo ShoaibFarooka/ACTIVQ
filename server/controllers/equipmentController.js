@@ -6,7 +6,6 @@ const handlebars = require("handlebars");
 const { generateCertificate, convertImageToBase64 } = require('../certificate-template/generate-certificate');
 
 handlebars.registerHelper('truncateText', function(text) {
-    console.log('Truncate Ran for comments!');
     if (text.length > 300) { 
         text = text.slice(0, 300) + '...'
     }

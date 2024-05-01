@@ -53,7 +53,14 @@ const AddUserModal = ({ isOpen, onRequestClose, fetchUsers }) => {
     };
 
     const handleAddUser = async () => {
-        if (!formData.name || !formData.username || !formData.password || !formData.code) {
+        if (
+            !formData.name ||
+            !formData.username ||
+            !formData.password ||
+            !formData.code ||
+            (formData.permissions['Photo signature'] === true && formData.role === 'employee' && formData.photoSignature == null) ||
+            (formData.role === 'manager' && formData.photoSignature == null)
+        ) {
             return message.error('Please fill all fields!');
         }
         const permissionsArray = Object.keys(formData.permissions).filter(
