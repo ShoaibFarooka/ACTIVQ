@@ -8,6 +8,7 @@ import { AUTHORITY } from '../utils/constants';
 import { message } from 'antd';
 import { useDispatch } from 'react-redux';
 import { HideLoading, ShowLoading } from '../redux/loaderSlice';
+import FileSaver from 'file-saver';
 
 const EquipmentReportModal = ({ isOpen, onRequestClose, onRefetch, equipments, selectedEquipmentId }) => {
     const dispatch = useDispatch();
@@ -16,13 +17,9 @@ const EquipmentReportModal = ({ isOpen, onRequestClose, onRefetch, equipments, s
     async function downloadReport(itemId) {
         dispatch(ShowLoading());
         try {
-            const fileURL = await equipmentService.generateReportCertificate({ equipmentId: itemId });
-            const anchor = document.createElement('a');
-            anchor.href = fileURL;
-            anchor.download = '';
-            document.body.appendChild(anchor);
-            anchor.click();
-            document.body.removeChild(anchor);
+            const response = await equipmentService.generateReportCertificate({ equipmentId: itemId });
+            console.log(response.data);
+            FileSaver.saveAs(new Blob([response.data], { type: 'application/pdf' }), 'report-' + Date.now() + '.pdf');
             message.success('Report has been download successfully!');
         } catch (error) {
             message.error(`${error}`)

@@ -25,26 +25,32 @@ function convertImageToBase64(imagePath) {
 }
 
 async function generateCertificate(props) {
-  // Launch a headless browser
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
-
-  // Render the Handlebars template with the data
-  const html = template(props);
-
-  // Set the HTML content of the page
-  await page.setContent(html);
-
-  // Generate PDF
-  const reportName = `report-${Date.now()}.pdf`;
-  await page.pdf({
-    path: path.join(__dirname, "./reports/", reportName),
-    format: "A4",
-  });
-
-  // Close the browser
-  await browser.close();
-  return reportName;
+  try {
+    const startTime = performance.now();
+    // Launch a headless browser
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+  
+    // Render the Handlebars template with the data
+    const html = template(props);
+  
+    // Set the HTML content of the page
+    await page.setContent(html);
+  
+    // Generate PDF
+    const pdfBuffer = await page.pdf({ format: "A4" });
+  
+    // Close the browser
+    await browser.close();
+  
+    const endTime = performance.now();
+    console.log((endTime - startTime) / 1000)
+  
+    return pdfBuffer;
+  } catch (error) {
+    console.log('error', error);
+    return -1; 
+  }
 }
 
 module.exports = {

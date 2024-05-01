@@ -41,13 +41,6 @@ mongoose.connect(DB)
         // Serve Images
         app.use('/uploads', express.static(path.join(__dirname, 'Photos')));
         
-        // Serve certificate files from the 'certificate-template/reports' directory with automatic download
-        app.use('/certificates', (req, res, next) => {
-            const fileName = path.basename(req.url);
-            res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
-            express.static(path.join(__dirname, 'certificate-template/reports'))(req, res, next);
-        });
-        
         // Routes
         app.use("/users", userRoutes);
         app.use("/info", infoRoutes);

@@ -2,7 +2,16 @@ const User = require("../models/userModel");
 const Info = require("../models/infoModel");
 const Equipment = require("../models/equipmentModel");
 const nodemailer = require("nodemailer"); 
+const handlebars = require("handlebars");
 const { generateCertificate, convertImageToBase64 } = require('../certificate-template/generate-certificate');
+
+handlebars.registerHelper('truncateText', function(text) {
+    console.log('Truncate Ran for comments!');
+    if (text.length > 300) { 
+        text = text.slice(0, 300) + '...'
+    }
+    return text;
+});
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -350,7 +359,7 @@ const GenerateReportCertificate = async (req, res) => {
                 select: 'photoSignature'
             });
 
-        const companyInfo = (await Info.find())[0];  // TODO: Confirm if this is okay.
+        const companyInfo = await Info.findOne({});
 
         if (equipemntData) {
             const equipmentOwner = equipemntData.owner;
@@ -384,7 +393,7 @@ const GenerateReportCertificate = async (req, res) => {
                 authorizedSignatoryImage = convertImageToBase64(claibrationDetails.reportVerification.approvedBy.photoSignature);
             }
 
-            const certificateName = await generateCertificate({
+            const pdfBuffer = await generateCertificate({
                 certificateNumber: claibrationDetails.certificateNo,
                 authorizedSignatory: authorizedSignatoryImage,
                 companyLogo: companyLogoImage,
@@ -424,13 +433,13 @@ const GenerateReportCertificate = async (req, res) => {
                 },
                 comments: claibrationDetails.comments
             });
-            res.send(req.protocol + '://' + req.get('host') + '/certificates/' + certificateName);
+            res.send(pdfBuffer);
         } else {
-            res.status(400)
+            res.status(400).send("Equipment Data not found")
         }
     } catch (error) {
         console.log(`${error}`);
-        res.send({ error });
+        res.status(502).send("Internal Server Error");
     }
 };
 

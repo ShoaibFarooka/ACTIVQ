@@ -75,8 +75,13 @@ const equipmentService = {
     },
     generateReportCertificate: async (payload) => {
         try {
-            const response = await axiosInstance.post("/equipments/generate-report-certificate", payload);
-            return response.data;
+            const response = await axiosInstance.post("/equipments/generate-report-certificate", payload, {
+                responseType: 'arraybuffer',
+                headers: {
+                  Accept: 'application/pdf',
+                },
+              });
+            return response;
         } catch (error) {
             throw error;
         }
