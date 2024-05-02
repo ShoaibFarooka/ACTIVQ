@@ -1,12 +1,12 @@
 const User = require("../models/userModel");
 const Info = require("../models/infoModel");
 const Equipment = require("../models/equipmentModel");
-const nodemailer = require("nodemailer"); 
+const nodemailer = require("nodemailer");
 const handlebars = require("handlebars");
 const { generateCertificate, convertImageToBase64 } = require('../certificate-template/generate-certificate');
 
-handlebars.registerHelper('truncateText', function(text) {
-    if (text.length > 300) { 
+handlebars.registerHelper('truncateText', function (text) {
+    if (text.length > 300) {
         text = text.slice(0, 300) + '...'
     }
     return text;
@@ -327,7 +327,7 @@ const VerifyEquipmentReport = async (req, res) => {
         if (operator?.role === 'admin' || operator?.role === 'manager' || operator?.role == 'employee' && operator.permissions.includes("Photo signature")) {
             const updatedEquipment = await Equipment.findOneAndUpdate(
                 { 'claibrationDetails._id': equipmentId },
-                { $set: { 'claibrationDetails.$.reportVerification': {...reportVerification, approvedBy: operatorId} } },
+                { $set: { 'claibrationDetails.$.reportVerification': { ...reportVerification, approvedBy: operatorId } } },
                 { new: true }
             );
             if (updatedEquipment) {
@@ -366,7 +366,7 @@ const GenerateReportCertificate = async (req, res) => {
             const refEquipment = claibrationDetails.referenceEquipment;
             const environmentalConditions = claibrationDetails.enviromentalConditions;
             const calcAverage = (numbers) => (numbers[0] !== undefined && numbers[1] !== undefined) ? ((numbers[0] + numbers[1]) / 2) : undefined;
-            const calcDifference = (numbers) => (numbers[0] !== undefined && numbers[1] !== undefined) ? Math.max(numbers[0], numbers[1]) - Math.min(numbers[0], numbers[1]) : undefined;
+            const calcDifference = (numbers) => (numbers[0] !== undefined && numbers[1] !== undefined) ? (Math.max(numbers[0], numbers[1]) - Math.min(numbers[0], numbers[1])) / 2 : undefined;
 
             function findMinMax(array) {
                 if (array.length === 0) return null;
@@ -382,7 +382,7 @@ const GenerateReportCertificate = async (req, res) => {
                 }
                 return [min, max];
             }
-            
+
             let companyLogoImage = null;
             let authorizedSignatoryImage = null;
             if (companyInfo?.logo != null && companyInfo?.logo?.trim() != "") {
