@@ -33,7 +33,7 @@ const Calibrations = () => {
     const [filteredEquipments, setFilteredEquipments] = useState([]);
     const [UpdateEquipment, setUpdateEquipment] = useState('');
     const [prevCounter, setPrevCounter] = useState(0);
-    const [report, setReport] = useState('');
+    const [reportId, setReportId] = useState('');
     const [isOpenPopup, setIsOpenPopup] = useState(false);
     const [isOpenPopup2, setIsOpenPopup2] = useState(false);
     const [selectedSort, setSelectedSort] = useState('');
@@ -79,7 +79,7 @@ const Calibrations = () => {
     }, []);
 
     const handleModalClose2 = () => {
-        setReport('');
+        setReportId('');
         setIsOpenPopup2(false);
     };
 
@@ -93,18 +93,18 @@ const Calibrations = () => {
         setIsOpenPopup(true);
     }
 
-    const handleViewReport = (claibrationDetails) => {
-        setReport(claibrationDetails);
+    const handleViewReport = (id) => {
+        setReportId(id);
         setIsOpenPopup2(true);
     }
 
     return (
         <>
             {(UpdateEquipment && isOpenPopup) &&
-                <CalibrateEquipmentModal isOpen={isOpenPopup} onRequestClose={handleModalClose} equipment={UpdateEquipment} counter={prevCounter} fetchEquipments={fetchEquipments} />
+                <CalibrateEquipmentModal isOpen={isOpenPopup} onRequestClose={handleModalClose} equipment={UpdateEquipment} counter={prevCounter} fetchEquipments={fetchEquipments} referenceEquipments={equipments.filter(item => item.category === 'reference')} />
             }
-            {report &&
-                <EquipmentReportModal isOpen={isOpenPopup2} onRequestClose={handleModalClose2} report={report} />
+            {reportId &&
+                <EquipmentReportModal isOpen={isOpenPopup2} onRequestClose={handleModalClose2} equipments={equipments} onRefetch={fetchEquipments} selectedEquipmentId={reportId} />
             }
             <div className='Equipments'>
                 <div className='flex'>
@@ -147,8 +147,7 @@ const Calibrations = () => {
                                 <td>
                                     <div className='action-icons-container'>
                                         <IoPlayForward size={20} className='action-icon' color='black' onClick={() => handleCalibrate(equipment)} />
-                                        {equipment.claibrationDetails.length > 0 && <FiFileText size={22} className='action-icon' color='#C93616' onClick={() => handleViewReport(equipment.claibrationDetails)} />}
-                                        {equipment.claibrationDetails.length > 0 && <FaFilePdf size={22} className='action-icon' color='red' />}
+                                        {equipment.claibrationDetails.length > 0 && <FiFileText size={22} className='action-icon' color='#C93616' onClick={() => handleViewReport(equipment._id)} />}
                                     </div>
                                 </td>
                             </tr>

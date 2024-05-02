@@ -1,6 +1,16 @@
 const User = require("../models/userModel");
+const Info = require("../models/infoModel");
 const Equipment = require("../models/equipmentModel");
-const nodemailer = require("nodemailer");
+const nodemailer = require("nodemailer"); 
+const handlebars = require("handlebars");
+const { generateCertificate, convertImageToBase64 } = require('../certificate-template/generate-certificate');
+
+handlebars.registerHelper('truncateText', function(text) {
+    if (text.length > 300) { 
+        text = text.slice(0, 300) + '...'
+    }
+    return text;
+});
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -20,6 +30,9 @@ const GetEquipments = async (req, res) => {
                 .populate({
                     path: 'claibrationDetails.calibratedBy',
                     select: 'name'
+                }).populate({
+                    path: 'claibrationDetails.referenceEquipment',
+                    select: '_id code parametersTable'
                 });
             if (equipments && equipments.length > 0) {
                 return res.status(200).json({ equipments });
@@ -207,9 +220,9 @@ const AddCalibrationDetails = async (req, res) => {
             dateOfIssue,
             workOrderNo,
             placeOfCalibration,
+            referenceEquipment,
             nextProposedCalibrationDuration,
             enviromentalConditions,
-            calibrationTemperature,
             calibrationTables,
             bathParameters
         } = req.body;
@@ -219,9 +232,9 @@ const AddCalibrationDetails = async (req, res) => {
             !dateOfIssue ||
             !workOrderNo ||
             !placeOfCalibration ||
+            !referenceEquipment ||
             !nextProposedCalibrationDuration ||
             !enviromentalConditions ||
-            !calibrationTemperature ||
             !calibrationTables ||
             !bathParameters
         ) {
@@ -231,7 +244,7 @@ const AddCalibrationDetails = async (req, res) => {
         const operatorId = res.locals.payload.id;
         const operator = await User.findById(operatorId);
         if (operator?.role === 'admin' || operator?.role === 'manager' || operator?.role === 'employee') {
-            const existingEquipment = await Equipment.findById(equipmentId);
+            const existingEquipment = await Equipment.findById(equipmentId).populate('claibrationDetails.referenceEquipment');
             if (!existingEquipment) {
                 return res.status(404).send("Equipment not found!");
             }
@@ -243,12 +256,15 @@ const AddCalibrationDetails = async (req, res) => {
                     dateOfIssue,
                     workOrderNo,
                     placeOfCalibration,
+                    referenceEquipment,
                     calibratedBy: operatorId,
                     nextProposedCalibrationDuration,
                     enviromentalConditions,
-                    calibrationTemperature,
                     calibrationTables,
                     bathParameters,
+                    reportVerification: {
+                        status: false
+                    }
                 }
                 if (req.body.comments) {
                     calibrationDetails.comments = req.body.comments;
@@ -300,6 +316,133 @@ Best regards`,
 
 };
 
+const VerifyEquipmentReport = async (req, res) => {
+    try {
+        const { equipmentId, reportVerification } = req.body;
+        if (!equipmentId) {
+            return res.status(400).send('Invalid data');
+        }
+        const operatorId = res.locals.payload.id;
+        const operator = await User.findById(operatorId);
+        if (operator?.role === 'admin' || operator?.role === 'manager' || operator?.role == 'employee' && operator.permissions.includes("Photo signature")) {
+            const updatedEquipment = await Equipment.findOneAndUpdate(
+                { 'claibrationDetails._id': equipmentId },
+                { $set: { 'claibrationDetails.$.reportVerification': {...reportVerification, approvedBy: operatorId} } },
+                { new: true }
+            );
+            if (updatedEquipment) {
+                return res.status(200).send('Verification status updated successfully');
+            } else {
+                return res.status(400).send('Unable to update verification status');
+            }
+        }
+        res.status(401).send('Unauthorized');
+    } catch (error) {
+        res.status(500).send('Internal Server Error');
+        throw error;
+    }
+}
+
+const GenerateReportCertificate = async (req, res) => {
+    try {
+        const equipemntData = await Equipment
+            .findOne({ 'claibrationDetails._id': req.body.equipmentId })
+            .populate('owner')
+            .populate('claibrationDetails.calibratedBy')
+            .populate({
+                path: 'claibrationDetails.referenceEquipment',
+                select: 'code description manufacturer model serialNo'
+            })
+            .populate({
+                path: 'claibrationDetails.reportVerification.approvedBy',
+                select: 'photoSignature'
+            });
+
+        const companyInfo = await Info.findOne({});
+
+        if (equipemntData) {
+            const equipmentOwner = equipemntData.owner;
+            const claibrationDetails = equipemntData.claibrationDetails.find((item) => item._id == req.body.equipmentId);
+            const refEquipment = claibrationDetails.referenceEquipment;
+            const environmentalConditions = claibrationDetails.enviromentalConditions;
+            const calcAverage = (numbers) => (numbers[0] !== undefined && numbers[1] !== undefined) ? ((numbers[0] + numbers[1]) / 2) : undefined;
+            const calcDifference = (numbers) => (numbers[0] !== undefined && numbers[1] !== undefined) ? Math.max(numbers[0], numbers[1]) - Math.min(numbers[0], numbers[1]) : undefined;
+
+            function findMinMax(array) {
+                if (array.length === 0) return null;
+                if (array.length === 1) return [array[0].calibrationTemperature, array[0].calibrationTemperature];
+                let min = array[0].calibrationTemperature;
+                let max = array[0].calibrationTemperature;
+                for (let i = 1; i < array.length; i++) {
+                    if (array[i].calibrationTemperature < min) {
+                        min = array[i].calibrationTemperature;
+                    } else if (array[i].calibrationTemperature > max) {
+                        max = array[i].calibrationTemperature;
+                    }
+                }
+                return [min, max];
+            }
+            
+            let companyLogoImage = null;
+            let authorizedSignatoryImage = null;
+            if (companyInfo?.logo != null && companyInfo?.logo?.trim() != "") {
+                companyLogoImage = convertImageToBase64(companyInfo.logo);
+            }
+            if (claibrationDetails?.reportVerification?.approvedBy?.photoSignature != null && claibrationDetails?.reportVerification?.approvedBy?.photoSignature?.trim() != "") {
+                authorizedSignatoryImage = convertImageToBase64(claibrationDetails.reportVerification.approvedBy.photoSignature);
+            }
+
+            const pdfBuffer = await generateCertificate({
+                certificateNumber: claibrationDetails.certificateNo,
+                authorizedSignatory: authorizedSignatoryImage,
+                companyLogo: companyLogoImage,
+                companyName: companyInfo.name,
+                contactInfo: companyInfo.telephone,
+                customer: equipmentOwner?.name ?? 'N/A',
+                address: equipmentOwner?.address ?? 'N/A',
+                itemCode: equipemntData.code,
+                description: equipemntData.description,
+                manufacturer: equipemntData.manufacturer,
+                type: "Thermometer",
+                serialNo: equipemntData.serialNo,
+                dateOfReceipt: claibrationDetails.dateOfReceipt.toLocaleDateString(),
+                dateOfCalibration: claibrationDetails.dateOfCalibration.toLocaleDateString(),
+                dateOfIssue: claibrationDetails.dateOfIssue.toLocaleDateString(),
+                placeOfCalibration: claibrationDetails.placeOfCalibration,
+                calibratedBy: claibrationDetails.calibratedBy.name,
+                calibrationRange: findMinMax(claibrationDetails.calibrationTables),
+                temperature: {
+                    average: calcAverage(environmentalConditions.temperature),
+                    tolerance: calcDifference(environmentalConditions.temperature)
+                },
+                relativeHumidity: {
+                    average: calcAverage(environmentalConditions.relativeHumidity),
+                    tolerance: calcDifference(environmentalConditions.relativeHumidity)
+                },
+                airPressure: {
+                    average: calcAverage(environmentalConditions.atmosphericPressure),
+                    tolerance: calcDifference(environmentalConditions.atmosphericPressure)
+                },
+                refEquipment: {
+                    code: refEquipment.code,
+                    description: refEquipment.description,
+                    manufacturer: refEquipment.manufacturer,
+                    model: refEquipment.model,
+                    serialNo: refEquipment.serialNo
+                },
+                comments: claibrationDetails.comments
+            });
+            res.send(pdfBuffer);
+        } else {
+            res.status(400).send("Equipment Data not found")
+        }
+    } catch (error) {
+        console.log(`${error}`);
+        res.status(502).send("Internal Server Error");
+    }
+};
+
+
 module.exports = {
     GetEquipments,
     DeleteEquipment,
@@ -308,5 +451,7 @@ module.exports = {
     UpdateEquipmentParameters,
     GetEquipmentReport,
     AddCalibrationDetails,
-    RemindOwnerViaMail
+    RemindOwnerViaMail,
+    VerifyEquipmentReport,
+    GenerateReportCertificate
 };

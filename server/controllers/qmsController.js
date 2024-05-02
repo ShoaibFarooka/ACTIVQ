@@ -11,7 +11,7 @@ const uploadQmsReport = async (req, res) => {
   const { category } = req.body;
   const report = req.files.file[0];
   try {
-    const filename = `${uuidv4()}???${report.originalname}`;
+    const filename = `${uuidv4()}???${report.originalname.replace(/\s+/g, '-')}`;
     const fileHandler = GoogleStorage.bucket(process.env.QMS_BUCKET).file(filename);
 
     await fileHandler.save(report.buffer, {

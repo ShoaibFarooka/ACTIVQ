@@ -65,6 +65,27 @@ const equipmentService = {
             throw error;
         }
     },
+    verifyEquipmentReport: async (payload) => {
+        try {
+            const response = await axiosInstance.post('/equipments/verify-equipment-report', payload);
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
+    generateReportCertificate: async (payload) => {
+        try {
+            const response = await axiosInstance.post("/equipments/generate-report-certificate", payload, {
+                responseType: 'arraybuffer',
+                headers: {
+                  Accept: 'application/pdf',
+                },
+              });
+            return response;
+        } catch (error) {
+            throw error;
+        }
+    },
 };
 
 export default equipmentService;

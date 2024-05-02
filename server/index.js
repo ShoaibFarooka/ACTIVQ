@@ -38,10 +38,9 @@ mongoose.connect(DB)
         app.get('/', (req, res) => {
             res.send('Server is Up!');
         });
-
         // Serve Images
         app.use('/uploads', express.static(path.join(__dirname, 'Photos')));
-
+        
         // Routes
         app.use("/users", userRoutes);
         app.use("/info", infoRoutes);

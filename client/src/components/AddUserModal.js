@@ -42,14 +42,25 @@ const AddUserModal = ({ isOpen, onRequestClose, fetchUsers }) => {
 
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
-        setFormData((prevData) => ({
-            ...prevData,
-            [name]: type === 'checkbox' ? { ...prevData[name], [value]: checked } : value,
-        }));
+        const updatedData = {
+            ...formData,
+            [name]: type === 'checkbox' ? { ...formData[name], [value]: checked } : value
+        };
+        if (name === 'permissions' && type === "checkbox" && value === "Photo signature") {
+            updatedData.photoSignature = null;
+        }
+        setFormData(updatedData);
     };
 
     const handleAddUser = async () => {
-        if (!formData.name || !formData.username || !formData.password || !formData.code) {
+        if (
+            !formData.name ||
+            !formData.username ||
+            !formData.password ||
+            !formData.code ||
+            (formData.permissions['Photo signature'] === true && formData.role === 'employee' && formData.photoSignature == null) ||
+            (formData.role === 'manager' && formData.photoSignature == null)
+        ) {
             return message.error('Please fill all fields!');
         }
         const permissionsArray = Object.keys(formData.permissions).filter(
@@ -62,7 +73,9 @@ const AddUserModal = ({ isOpen, onRequestClose, fetchUsers }) => {
             password: formData.password,
             role: formData.role,
             permissions: permissionsArray,
-            photoSignature: formData.photoSignature
+        }
+        if ((formData.role === 'manager' || (formData.role === 'employee' && formData.permissions['Photo signature'] === true)) && formData.photoSignature != null) {
+            data.photoSignature = formData.photoSignature;
         }
         try {
             const response = await userService.addUser(data);
@@ -157,7 +170,7 @@ const AddUserModal = ({ isOpen, onRequestClose, fetchUsers }) => {
                             </div>
                         </div>
                     }
-                    {formData.role === 'manager' &&
+                    {(formData.role === 'manager' || (formData.role === 'employee' && formData.permissions['Photo signature'] === true)) &&
                         <div>
                             {formData.photoSignature != null && 
                                 <img width={160} src={formData.photoSignature instanceof File ?
@@ -168,9 +181,7 @@ const AddUserModal = ({ isOpen, onRequestClose, fetchUsers }) => {
                             }
                             <br />
                             Add Photo Signature:
-                            <input type="file" multiple={false} onChange={(ev) => {
-                                setFormData({...formData, photoSignature: ev.target.files[0] })
-                            }} />
+                            <input type="file" multiple={false} onChange={(ev) => setFormData({...formData, photoSignature: ev.target.files[0] ?? null })} />
                         </div>
                     }
                     <div className="btn-div">

@@ -9,16 +9,11 @@ const storage = multer.diskStorage({
         cb(null, "Photos/");
     },
     filename: (req, file, cb) => {
-        cb(null, Date.now() + "-" + file.originalname);
+        cb(null, Date.now() + "-" + file.originalname.replace(/\s+/g, '-'));
     },
 });
 
 const upload = multer({ storage: storage });
-
-const uploadPhotoSign = (req, res, next) => {
-    upload.fields([{ name: 'photoSignature' }]);
-    next();
-};
 
 router.post(
     "/register",
