@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,6 +11,7 @@
         margin: 48px;
         font-family: sans-serif;
     }
+
     .header-text {
         margin-top: 24px;
         font-size: 28px;
@@ -17,28 +19,33 @@
         display: flex;
         justify-content: space-between;
     }
-    .header-text > span {
 
-    }
-    .header-text > img {
+    .header-text>span {}
+
+    .header-text>img {
         margin-bottom: 16px;
     }
+
     .hr {
         padding: 0.5px;
         background-color: black;
         margin: 0;
     }
+
     .certificate {
         font-size: 12px;
         margin-left: 15%;
     }
+
     .certificate-number {
         color: rgb(0, 0, 161);
     }
+
     .company {
         margin: 8px;
         display: flex;
     }
+
     .company-logo-placeholder {
         width: 80px;
         min-width: 80px;
@@ -49,6 +56,7 @@
         border: 1px red solid;
         content: 'LOGO';
     }
+
     .company-logo {
         width: 80px;
         min-width: 80px;
@@ -57,16 +65,19 @@
         max-height: 80px;
         min-height: 80px;
     }
+
     .company-info {
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         margin-left: 12px;
     }
+
     .company-name {
         font-weight: bold;
         font-size: 24px;
     }
+
     .company-contact {
         font-size: 12px;
     }
@@ -76,8 +87,8 @@
         grid-template-columns: 25% 75%;
         font-size: 12px;
     }
-    
-    .grid-container > * {
+
+    .grid-container>* {
         margin-bottom: 12px;
     }
 
@@ -85,6 +96,7 @@
         color: rgb(0, 0, 161);
         font-size: 12px;
     }
+
     .sub-head-text {
         font-size: 12px;
         margin-right: 15%;
@@ -111,8 +123,8 @@
         text-align: center;
         font-size: 12px;
     }
-    
-    .flex { 
+
+    .flex {
         display: flex;
     }
 
@@ -193,7 +205,15 @@
         font-size: 18px;
     }
 
+    .gap-5 {
+        gap: 5px;
+    }
+
+    .gap-10 {
+        gap: 10px;
+    }
 </style>
+
 <body>
     <div class="container">
         <br>
@@ -214,9 +234,9 @@
         <br>
         <div class="company">
             {{#if companyLogo }}
-                <img class="company-logo" src="{{ companyLogo }}">
+            <img class="company-logo" src="{{ companyLogo }}">
             {{else}}
-                <img class="company-logo-placeholder">
+            <img class="company-logo-placeholder">
             {{/if}}
             <div class="company-info">
                 <div class="company-name">
@@ -262,11 +282,11 @@
         </div>
         <br>
         <center class="f-10">
-                {{#if authorizedSignatory}}
-                    <img class="company-logo" src="{{ authorizedSignatory }}">
-                {{else}}
-                    <img class="company-logo-placeholder">
-                {{/if}}
+            {{#if authorizedSignatory}}
+            <img class="company-logo" src="{{ authorizedSignatory }}">
+            {{else}}
+            <img class="company-logo-placeholder">
+            {{/if}}
             <div>Authorized Signatory</div>
         </center>
         <br>
@@ -276,7 +296,10 @@
         <hr class="hr">
         <br>
         <span class="footer-text">
-            <i>This certificate may not be reproduced other than in full or without prior written approval of {{ companyName }} Certificates without signature are not valid. A copy of this certificate will be kept at the issuing laboratory for a period of at least five years. The results concern only the calibration item.</i>
+            <i>This certificate may not be reproduced other than in full or without prior written approval of {{
+                companyName }} Certificates without signature are not valid. A copy of this certificate will be kept at
+                the issuing laboratory for a period of at least five years. The results concern only the calibration
+                item.</i>
         </span>
         <br>
         <br>
@@ -291,16 +314,16 @@
         <!-- PAGE 2 BEGINS HERE! -->
         <br>
         <br>
-        <div class="flex" style="align-items: flex-start; margin: 24px;"> 
+        <div class="flex" style="align-items: flex-start; margin: 24px;">
             {{#if companyLogo }}
-                <img class="company-logo" src="{{ companyLogo }}">
+            <img class="company-logo" src="{{ companyLogo }}">
             {{else}}
-                <img class="company-logo-placeholder">
+            <img class="company-logo-placeholder">
             {{/if}}
             <div class="header-color f-18" style="margin-left: 12px;">
                 <b><i>
-                    CERTIFICATE OF CALIBRATION
-                </i></b>
+                        CERTIFICATE OF CALIBRATION
+                    </i></b>
             </div>
             <img src="http://localhost:5005/uploads/banner.png" alt="Banner" width="25%" style="margin-left: auto;">
         </div>
@@ -312,13 +335,13 @@
         <br>
         <center class="sub-head-text certificate-number">
             <b><i>
-                CALIBRATION OF APPARATUS
-            </i></b>
+                    CALIBRATION OF APPARATUS
+                </i></b>
         </center>
         <div class="question-text">
             <b><i>
-                1. Condition of apparatus to be calibrated
-            </i></b>
+                    1. Condition of apparatus to be calibrated
+                </i></b>
         </div>
         <div class="question-text">
             <i>
@@ -327,8 +350,8 @@
         </div>
         <div class="question-text">
             <b><i>
-                2. Technical specifications of apparatus under calibration
-            </i></b>
+                    2. Technical specifications of apparatus under calibration
+                </i></b>
         </div>
         <table style="width: 65%">
             <thead>
@@ -393,11 +416,11 @@
         </table>
         <div class="question-text">
             <b><i>
-                3. Environmental conditions during calibration
-            </i></b>
+                    3. Environmental conditions during calibration
+                </i></b>
         </div>
         <div class="f-10">
-            <div class="flex">
+            <div class="flex gap-5">
                 <span>Temperature</span>
                 <span>:</span>
                 <span class="flex">
@@ -409,7 +432,7 @@
                 <span>{{ temperature.tolerance }}</span>
                 <span>°C</span>
             </div>
-            <div class="flex">
+            <div class="flex gap-5">
                 <span>Relative Humidity</span>
                 <span>:</span>
                 <span class="flex">
@@ -421,7 +444,7 @@
                 <span>{{ relativeHumidity.tolerance }}</span>
                 <span>%RH</span>
             </div>
-            <div class="flex">
+            <div class="flex gap-5">
                 <span>Air Pressure</span>
                 <span>:</span>
                 <span class="flex">
@@ -436,11 +459,12 @@
         </div>
         <div class="question-text">
             <b><i>
-                4. Calibration procedure
-            </i></b>
+                    4. Calibration procedure
+                </i></b>
         </div>
         <div class="question-text">
-            <i>The calibration of apparatus was carried out by comparison using standard reference equipment into a standard mean of comparison, as indicated below.</i>
+            <i>The calibration of apparatus was carried out by comparison using standard reference equipment into a
+                standard mean of comparison, as indicated below.</i>
         </div>
         <div class="question-text">
             <b><i>5. Apparatus - Traceability</i></b>
@@ -472,21 +496,23 @@
         </table>
         <div class="question-text">
             <b><i>
-                6. Uncertainty
-            </i></b>
+                    6. Uncertainty
+                </i></b>
         </div>
         <div class="question-text">
-            <i>The report expanded uncertainty is based on a confidence level of 95%. It has been evaluated in accordance to EA-4/02 "Guide to the expression of uncertainty in measurement". It includes the reference apparatus uncertainty and the apparatus under calibration uncertainty</i>
+            <i>The report expanded uncertainty is based on a confidence level of 95%. It has been evaluated in
+                accordance to EA-4/02 "Guide to the expression of uncertainty in measurement". It includes the reference
+                apparatus uncertainty and the apparatus under calibration uncertainty</i>
         </div>
         <center class="certificate-number f-12">
             <b><i>
-                CALIBRATION RESULTS
-            </i></b>
+                    CALIBRATION RESULTS
+                </i></b>
         </center>
         <center class="certificate-number f-12">
             <b><i>
-                Channel T1: Sensor 1
-            </i></b>
+                    Channel T1: Sensor 1
+                </i></b>
         </center>
         <table class="outline-compressed-table">
             <thead>
@@ -552,8 +578,8 @@
         </table>
         <center class="certificate-number f-12">
             <b><i>
-                Channel T2: Sensor 2
-            </i></b>
+                    Channel T2: Sensor 2
+                </i></b>
         </center>
         <table class="outline-compressed-table">
             <thead>
@@ -619,29 +645,31 @@
         </table>
         <div class="question-text">
             <b><i>
-                7. Notes
-            </i></b>
+                    7. Notes
+                </i></b>
         </div>
         <table class="notes-table">
             <tbody>
                 <tr>
                     <td>1.</td>
-                    <td>A label is suplied with the calibrated object showing the calibration date and certificate number</td>
+                    <td>A label is suplied with the calibrated object showing the calibration date and certificate
+                        number</td>
                 </tr>
                 <tr>
                     <td>2.</td>
-                    <td>The results apply to the state of the calibrated instrument and to the conditions at the time of calibration. Long term effects on the item to be calibrated are not included</td>
+                    <td>The results apply to the state of the calibrated instrument and to the conditions at the time of
+                        calibration. Long term effects on the item to be calibrated are not included</td>
                 </tr>
                 {{#if comments}}
-                    <tr>
-                        <td>3.</td>
-                        <td style="
+                <tr>
+                    <td>3.</td>
+                    <td style="
                             max-height: 140px;
                             word-wrap: break-word;
                             text-overflow: ellipsis;
                             overflow: hidden;
                         ">{{ truncateText comments }}</td>
-                    </tr>
+                </tr>
                 {{/if}}
             </tbody>
         </table>
@@ -654,4 +682,5 @@
         <div align="right" class="certificate-number">Page 2 of 2</div>
     </div>
 </body>
+
 </html>
