@@ -80,7 +80,7 @@ const CompanyInfo = () => {
             message.success(response.message);
             setAdminPhotoSignature(response.photoSignature)
         } catch (error) {
-            message.error('Something went wrong');            
+            message.error('Something went wrong');
         }
     };
 
@@ -160,20 +160,20 @@ const CompanyInfo = () => {
                 )}
 
                 <div>
-                    {adminPhotoSignature != null && 
-                        <img width={160} src={adminPhotoSignature instanceof File
-                            ? URL.createObjectURL(adminPhotoSignature) 
-                            : adminPhotoSignature}
-                            alt='Photo_Signature.' 
-                        />
-                    }
-                    <br />
                     Add Photo Signature:
                     <br />
                     <div>
                         <input type="file" multiple={false} onChange={(ev) => {
                             setAdminPhotoSignature(ev.target.files[0])
                         }} />
+                        <br />
+                        {adminPhotoSignature != null &&
+                            <img width={160} src={adminPhotoSignature instanceof File
+                                ? URL.createObjectURL(adminPhotoSignature)
+                                : adminPhotoSignature}
+                                alt='Photo_Signature.'
+                            />
+                        }
                         {(adminPhotoSignature && adminPhotoSignature instanceof File) &&
                             <div className='save-signature' onClick={updateAdminPhotoSignature}>
                                 Save
