@@ -212,6 +212,24 @@
     .gap-10 {
         gap: 10px;
     }
+
+    .seal-primary-section {
+        width: 100px;
+        height: 100px;
+        max-width: 100px;
+        max-height: 100px; 
+        min-width: 100px; 
+        min-height: 100px; 
+    }
+    .seal-secondary-section {
+        max-width: 75px;
+        max-height: 75px; 
+        min-width: 75px; 
+        min-height: 75px; 
+    }
+    .placeholder-border {
+        border: 1px red solid;
+    }
 </style>
 
 <body>
@@ -220,7 +238,16 @@
         <hr class="hr">
         <div class="header-text">
             <span class="f-18"><b><i>CERTIFICATE OF CALIBRATION</i></b></span>
-            <img width="30%" src="http://localhost:5005/uploads/banner.png" alt="authorities">
+            <div>
+                {{#if firstSeal}}
+                    <img src="{{ firstSeal }}" class="seal-primary-section">
+                {{else}}
+                    <img class="seal-primary-section placeholder-border">
+                {{/if}}
+                {{#if secondSeal}}
+                    <img width="100px" height="100px" src="{{ secondSeal }}" class="seal-primary-section">
+                {{/if}}
+            </div>
         </div>
         <hr class="hr">
         <center class="certificate">
@@ -322,10 +349,19 @@
             {{/if}}
             <div class="header-color f-18" style="margin-left: 12px;">
                 <b><i>
-                        CERTIFICATE OF CALIBRATION
-                    </i></b>
+                    CERTIFICATE OF CALIBRATION
+                </i></b>
             </div>
-            <img src="http://localhost:5005/uploads/banner.png" alt="Banner" width="25%" style="margin-left: auto;">
+            <div style="margin-left: auto;">
+                {{#if firstSeal}}
+                    <img src="{{ firstSeal }}" class="seal-secondary-section">
+                {{else}}
+                    <img class="seal-secondary-section placeholder-border">
+                {{/if}}
+                {{#if secondSeal}}
+                    <img width="100px" height="100px" src="{{ secondSeal }}" class="seal-secondary-section">
+                {{/if}}
+            </div>
         </div>
         <hr class="hr">
         <center class="certificate">
@@ -335,13 +371,13 @@
         <br>
         <center class="sub-head-text certificate-number">
             <b><i>
-                    CALIBRATION OF APPARATUS
-                </i></b>
+                CALIBRATION OF APPARATUS
+            </i></b>
         </center>
         <div class="question-text">
             <b><i>
-                    1. Condition of apparatus to be calibrated
-                </i></b>
+                1. Condition of apparatus to be calibrated
+            </i></b>
         </div>
         <div class="question-text">
             <i>
@@ -350,8 +386,8 @@
         </div>
         <div class="question-text">
             <b><i>
-                    2. Technical specifications of apparatus under calibration
-                </i></b>
+                2. Technical specifications of apparatus under calibration
+            </i></b>
         </div>
         <table style="width: 65%">
             <thead>
@@ -459,8 +495,8 @@
         </div>
         <div class="question-text">
             <b><i>
-                    4. Calibration procedure
-                </i></b>
+                4. Calibration procedure
+            </i></b>
         </div>
         <div class="question-text">
             <i>The calibration of apparatus was carried out by comparison using standard reference equipment into a
@@ -496,8 +532,8 @@
         </table>
         <div class="question-text">
             <b><i>
-                    6. Uncertainty
-                </i></b>
+                6. Uncertainty
+            </i></b>
         </div>
         <div class="question-text">
             <i>The report expanded uncertainty is based on a confidence level of 95%. It has been evaluated in

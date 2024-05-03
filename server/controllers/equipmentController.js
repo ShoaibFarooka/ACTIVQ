@@ -395,6 +395,8 @@ const GenerateReportCertificate = async (req, res) => {
             const pdfBuffer = await generateCertificate({
                 certificateNumber: claibrationDetails.certificateNo,
                 authorizedSignatory: authorizedSignatoryImage,
+                firstSeal: convertImageToBase64(companyInfo.seal1),
+                secondSeal: convertImageToBase64(companyInfo.seal2),
                 companyLogo: companyLogoImage,
                 companyName: companyInfo.name,
                 contactInfo: companyInfo.telephone,
