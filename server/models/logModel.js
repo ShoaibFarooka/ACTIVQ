@@ -7,6 +7,10 @@ const logSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    username: {
+      type: String,
+      required: true,
+    },
     loginTime: {
       type: [String],
       required: true,
